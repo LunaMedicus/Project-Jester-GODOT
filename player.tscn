@@ -1,0 +1,51 @@
+[gd_scene load_steps=9 format=3 uid="uid://c76u62xtc5gea"]
+
+[ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
+[ext_resource type="Script" uid="uid://dru8jgjek53cw" path="res://Scripts/States/IdleState.cs" id="2_sweqy"]
+[ext_resource type="Script" uid="uid://ctv6t1go4ty0j" path="res://Scripts/States/WalkState.cs" id="3_2hs0m"]
+[ext_resource type="Script" uid="uid://d16a0bswvxosg" path="res://Scripts/States/AirState.cs" id="4_1jxqw"]
+[ext_resource type="Script" uid="uid://3vq33trsutfy" path="res://Scripts/States/WallRunState.cs" id="5_sweqy"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
+albedo_color = Color(0.827451, 0, 0, 1)
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("GameplayCamera")]
+script = ExtResource("1_hqtel")
+GameplayCamera = NodePath("Camera3D")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_sh265")
+debug_color = Color(0.34271184, 0.62123054, 0, 0.41960785)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.4066904, 2.2374122)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_4flbx")
+surface_material_override/0 = SubResource("StandardMaterial3D_hqtel")
+
+[node name="StateMachine" type="Node" parent="."]
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("2_sweqy")
+
+[node name="Walk" type="Node" parent="StateMachine"]
+script = ExtResource("3_2hs0m")
+
+[node name="Air" type="Node" parent="StateMachine"]
+script = ExtResource("4_1jxqw")
+
+[node name="WallRun" type="Node" parent="StateMachine"]
+script = ExtResource("5_sweqy")
+
+[node name="WallChecks" type="Node3D" parent="."]
+
+[node name="RightWall" type="RayCast3D" parent="WallChecks"]
+target_position = Vector3(0.8, 0, 0)
+
+[node name="LeftWall" type="RayCast3D" parent="WallChecks"]
+target_position = Vector3(-0.8, 0, 0)
