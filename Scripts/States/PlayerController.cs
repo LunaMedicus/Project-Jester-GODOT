@@ -90,6 +90,7 @@ public partial class PlayerController : CharacterBody3D
 		if (Input.IsActionJustPressed("Reset"))
 		{
 			GetTree().ReloadCurrentScene();
+			GD.Print("Scene reloaded");
 		}
 	}
 
