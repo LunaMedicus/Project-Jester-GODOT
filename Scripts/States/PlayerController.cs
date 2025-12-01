@@ -86,6 +86,11 @@ public partial class PlayerController : CharacterBody3D
 			camRot.Z = CurrentTilt;
 			GameplayCamera.Rotation = camRot;
 		}
+		if (Input.IsActionJustPressed("Reset"))
+		{
+			GetTree().ReloadCurrentScene();
+			GD.Print("Scene reloaded");
+		}
 	}
 
 	public void ChangeState(BaseState newState)
