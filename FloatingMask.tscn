@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6a3slprnkswj"]
+
+[ext_resource type="Script" uid="uid://nclhpn33e1q1" path="res://Scripts/Enemies/FloatingMask.cs" id="1_rcudo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_88mio"]
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_ayhhs"]
+material = SubResource("StandardMaterial3D_88mio")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_unutv"]
+
+[node name="FloatingMask" type="CharacterBody3D"]
+script = ExtResource("1_rcudo")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_ayhhs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_unutv")

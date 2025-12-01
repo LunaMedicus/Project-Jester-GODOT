@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cxabkxvncgeip"]
+[gd_scene load_steps=6 format=3 uid="uid://cxabkxvncgeip"]
 
 [ext_resource type="PackedScene" uid="uid://c76u62xtc5gea" path="res://player.tscn" id="1_glv2v"]
+[ext_resource type="PackedScene" uid="uid://c6a3slprnkswj" path="res://FloatingMask.tscn" id="2_uu6xs"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uu6xs"]
 size = Vector3(20, 1, 20)
@@ -14,13 +15,12 @@ albedo_color = Color(0.48235294, 0.7019608, 0.4117647, 1)
 [node name="World" type="Node3D"]
 
 [node name="Floor" type="StaticBody3D" parent="."]
-transform = Transform3D(1.72, 0, 0, 0, 1.72, 0, 0, 0, 1.72, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_uu6xs")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0, 0, 0)
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, -0.014649989, -0.0220454, -0.001972775)
 mesh = SubResource("BoxMesh_r0du0")
 surface_material_override/0 = SubResource("StandardMaterial3D_glv2v")
 
@@ -74,3 +74,9 @@ shadow_enabled = true
 
 [node name="Player" parent="." instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6989336, 1.5379684, 1.1073625)
+
+[node name="FloatingMask" parent="." instance=ExtResource("2_uu6xs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.192696, 1.8265381, -61.972588)
+
+[node name="FloatingMask2" parent="." instance=ExtResource("2_uu6xs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9567623, 2.8967853, -55.912144)
