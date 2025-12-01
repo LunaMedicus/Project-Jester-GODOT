@@ -74,3 +74,8 @@ shadow_enabled = true
 
 [node name="Player" parent="." instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6989336, 1.5379684, 1.1073625)
+JumpVelocity = 10.0
+WallRunSpeed = 15.0
+DiveVerticalSpeed = 15.0
+DiveRollSpeed = 30.0
+MinDiveTimeForRoll = 0.25
