@@ -16,7 +16,6 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0
 mass = 0.1
 gravity_scale = 0.0
 script = ExtResource("1_dd2wi")
-LaunchSpeed = 40.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_hael8")
@@ -26,6 +25,7 @@ mesh = SubResource("BoxMesh_21rx5")
 skeleton = NodePath("")
 
 [node name="Hitbox" type="Area3D" parent="."]
+collision_mask = 5
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
 shape = SubResource("BoxShape3D_3ujke")

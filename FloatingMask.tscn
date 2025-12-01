@@ -11,6 +11,8 @@ material = SubResource("StandardMaterial3D_88mio")
 [sub_resource type="SphereShape3D" id="SphereShape3D_unutv"]
 
 [node name="FloatingMask" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
 script = ExtResource("1_rcudo")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

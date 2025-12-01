@@ -10,38 +10,44 @@ public partial class DashState : BaseState
         GD.Print("Entered Dash");
         _timer = Player.DashDuration;
         
-        // 1. Determine Direction
-        // If holding input, dash that way. If no input, dash forward (where mesh faces).
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        
+        // Camera Relative Dash
+        Vector3 camForward = -Player.CameraRig.GameplayCamera.GlobalTransform.Basis.Z;
+        Vector3 camRight = Player.CameraRig.GameplayCamera.GlobalTransform.Basis.X;
+        camForward.Y = 0; camForward = camForward.Normalized();
+        camRight.Y = 0; camRight = camRight.Normalized();
+
         Vector3 dashDir;
 
         if (inputDir != Vector2.Zero)
         {
-            dashDir = (Player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
+            dashDir = (camForward * -inputDir.Y + camRight * inputDir.X).Normalized();
         }
         else
         {
-            // Dash where the character is facing if no button pressed
-            // (Assumes Forward is -Z in Godot)
-            dashDir = -Player.Transform.Basis.Z; 
+            // Dash Forward relative to Visuals
+            dashDir = -Player.Visuals.GlobalTransform.Basis.Z; 
         }
 
-        // 2. Apply High Velocity
-        // We set Y to 0 so we don't dash downwards into the floor friction
         Player.Velocity = new Vector3(dashDir.X * Player.DashSpeed, 0, dashDir.Z * Player.DashSpeed);
-        
-        // TODO: Enable Invulnerability here (Player.IsInvincible = true)
     }
 
     public override void PhysicsUpdate(double delta)
     {
-        // Count down
         _timer -= delta;
 
-        // Transition 1: Time is up
+        // --- SLIDE HOP LOGIC ---
+        // If we touch the ground while Dashing -> SLIDE!
+        if (Player.IsOnFloor())
+        {
+            Player.ChangeState(Player.StateDiveRoll);
+            return;
+        }
+        // -----------------------
+
         if (_timer <= 0)
         {
-            // If moving, go to Walk, else Idle
             if (Player.Velocity.Length() > 0.1f)
                 Player.ChangeState(Player.StateWalk);
             else
@@ -49,18 +55,17 @@ public partial class DashState : BaseState
             return;
         }
 
-        // Transition 2: We dashed off a cliff (Subtask requirement)
+        // Allow falling if we dashed off a cliff, but keep momentum
         if (!Player.IsOnFloor())
         {
-            Player.ChangeState(Player.StateAir);
+             // Optional: You can transition to Air here if you want Dash to be strictly grounded,
+             // but usually "Air Dash" allows you to finish the move.
         }
     }
 
     public override void Update(double delta) {}
     public override void Exit() 
     {
-        // TODO: Disable Invulnerability here
-        // Stop the momentum slightly so they don't slide on ice
-        Player.Velocity = Vector3.Zero;
+        // Don't stop velocity completely, allows for bunny hopping
     }
 }

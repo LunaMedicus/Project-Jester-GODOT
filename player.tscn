@@ -1,40 +1,58 @@
-[gd_scene load_steps=13 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=16 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
 [ext_resource type="Script" uid="uid://dru8jgjek53cw" path="res://Scripts/States/IdleState.cs" id="2_sweqy"]
 [ext_resource type="Script" uid="uid://ctv6t1go4ty0j" path="res://Scripts/States/WalkState.cs" id="3_2hs0m"]
+[ext_resource type="Script" uid="uid://diyfswbdkok5y" path="res://Scripts/CameraRig.cs" id="3_nvl01"]
 [ext_resource type="Script" uid="uid://d16a0bswvxosg" path="res://Scripts/States/AirState.cs" id="4_1jxqw"]
 [ext_resource type="Script" uid="uid://3vq33trsutfy" path="res://Scripts/States/WallRunState.cs" id="5_sweqy"]
 [ext_resource type="Script" uid="uid://dm6o37p3ejafw" path="res://Scripts/States/DashState.cs" id="6_dw050"]
 [ext_resource type="Script" uid="uid://dn83ltp68v6ue" path="res://Scripts/States/DiveState.cs" id="7_b26j0"]
 [ext_resource type="Script" uid="uid://dhh461tahccl3" path="res://Scripts/States/DiveRollState.cs" id="8_n7ghd"]
+[ext_resource type="Script" uid="uid://ccq368jymee7r" path="res://Scripts/States/AttackState.cs" id="10_n7ghd"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_nvl01"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
 albedo_color = Color(0.827451, 0, 0, 1)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("RightHandPos", "LeftHandPos", "GameplayCamera") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Visuals", "CameraRig", "RightHandPos", "LeftHandPos") groups=["Player"]]
+collision_layer = 2
 script = ExtResource("1_hqtel")
+Visuals = NodePath("MeshInstance3D")
+CameraRig = NodePath("CamOrigin")
 CardScene = ExtResource("2_b26j0")
-RightHandPos = NodePath("Camera3D/RightHandPos")
-LeftHandPos = NodePath("Camera3D/LeftHandPos")
-GameplayCamera = NodePath("Camera3D")
+RightHandPos = NodePath("CamOrigin/SpringArm3D/Camera3D/RightHandPos")
+LeftHandPos = NodePath("CamOrigin/SpringArm3D/Camera3D/LeftHandPos")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_sh265")
 debug_color = Color(0.34271184, 0.62123054, 0, 0.41960785)
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.7997837, 2.0313382)
+[node name="CamOrigin" type="Node3D" parent="." node_paths=PackedStringArray("PlayerTarget", "SpringArm", "GameplayCamera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+top_level = true
+script = ExtResource("3_nvl01")
+PlayerTarget = NodePath("..")
+SpringArm = NodePath("SpringArm3D")
+GameplayCamera = NodePath("SpringArm3D/Camera3D")
 
-[node name="RightHandPos" type="Node3D" parent="Camera3D"]
+[node name="SpringArm3D" type="SpringArm3D" parent="CamOrigin"]
+shape = SubResource("SphereShape3D_nvl01")
+spring_length = 3.0
+margin = 0.5
+
+[node name="Camera3D" type="Camera3D" parent="CamOrigin/SpringArm3D"]
+
+[node name="RightHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85558885, -0.59990895, -2.9566665)
 
-[node name="LeftHandPos" type="Node3D" parent="Camera3D"]
+[node name="LeftHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99592006, -0.59990895, -2.9566665)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -63,6 +81,9 @@ script = ExtResource("7_b26j0")
 
 [node name="DiveRoll" type="Node" parent="StateMachine"]
 script = ExtResource("8_n7ghd")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("10_n7ghd")
 
 [node name="WallChecks" type="Node3D" parent="."]
 
