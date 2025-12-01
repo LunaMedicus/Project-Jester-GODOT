@@ -57,6 +57,14 @@ public partial class AirState : BaseState
 
 		// Debug Print (Optional - helps you see falling speed)
 		// GD.Print("Falling Speed: " + Player.Velocity.Y);
+		
+		// --- NEW: DIVE TRIGGER ---
+		// If in air and press Dash button -> Dive
+		if (Input.IsActionJustPressed("dash"))
+		{
+			Player.ChangeState(Player.StateDive);
+			return;
+		}
 
 		// ---------------------------------------------------------
 		// 3. GRAVITY & PHYSICS

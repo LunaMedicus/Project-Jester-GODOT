@@ -25,6 +25,13 @@ public partial class IdleState : BaseState
             Player.Velocity = new Vector3(0, Player.JumpVelocity, 0);
             Player.ChangeState(Player.StateAir);
         }
+        
+        // --- NEW: DASH TRIGGER ---
+        if (Input.IsActionJustPressed("dash"))
+        {
+            Player.ChangeState(Player.StateDash);
+            return;
+        }
 
         // Check for Movement Input (WASD)
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");

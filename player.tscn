@@ -1,10 +1,13 @@
-[gd_scene load_steps=9 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=12 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="Script" uid="uid://dru8jgjek53cw" path="res://Scripts/States/IdleState.cs" id="2_sweqy"]
 [ext_resource type="Script" uid="uid://ctv6t1go4ty0j" path="res://Scripts/States/WalkState.cs" id="3_2hs0m"]
 [ext_resource type="Script" uid="uid://d16a0bswvxosg" path="res://Scripts/States/AirState.cs" id="4_1jxqw"]
 [ext_resource type="Script" uid="uid://3vq33trsutfy" path="res://Scripts/States/WallRunState.cs" id="5_sweqy"]
+[ext_resource type="Script" uid="uid://dm6o37p3ejafw" path="res://Scripts/States/DashState.cs" id="6_dw050"]
+[ext_resource type="Script" uid="uid://dn83ltp68v6ue" path="res://Scripts/States/DiveState.cs" id="7_b26j0"]
+[ext_resource type="Script" uid="uid://dhh461tahccl3" path="res://Scripts/States/DiveRollState.cs" id="8_n7ghd"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 
@@ -15,6 +18,10 @@ albedo_color = Color(0.827451, 0, 0, 1)
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("GameplayCamera")]
 script = ExtResource("1_hqtel")
+DiveVerticalSpeed = 10.0
+DiveRollSpeed = 15.0
+DiveForwardSpeed = 30.0
+MinDiveTimeForRoll = 0.05
 GameplayCamera = NodePath("Camera3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -22,7 +29,7 @@ shape = SubResource("CapsuleShape3D_sh265")
 debug_color = Color(0.34271184, 0.62123054, 0, 0.41960785)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.4066904, 2.2374122)
+transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.8464794, 2.2374122)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_4flbx")
@@ -41,6 +48,15 @@ script = ExtResource("4_1jxqw")
 
 [node name="WallRun" type="Node" parent="StateMachine"]
 script = ExtResource("5_sweqy")
+
+[node name="Dash" type="Node" parent="StateMachine"]
+script = ExtResource("6_dw050")
+
+[node name="Dive" type="Node" parent="StateMachine"]
+script = ExtResource("7_b26j0")
+
+[node name="DiveRoll" type="Node" parent="StateMachine"]
+script = ExtResource("8_n7ghd")
 
 [node name="WallChecks" type="Node3D" parent="."]
 

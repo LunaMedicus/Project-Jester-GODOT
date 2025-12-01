@@ -25,6 +25,13 @@ public partial class WalkState : BaseState
             return;
         }
 
+        // --- NEW: DASH TRIGGER ---
+        if (Input.IsActionJustPressed("dash"))
+        {
+            Player.ChangeState(Player.StateDash);
+            return;
+        }
+        
         // 3. Move Logic
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         
