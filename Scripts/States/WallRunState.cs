@@ -19,6 +19,12 @@ public partial class WallRunState : BaseState
             Player.ChangeState(Player.StateAir);
             return;
         }
+        
+        // --- NEW: CARD THROW
+        if (Input.IsActionJustPressed("attack"))
+        {
+            Player.ThrowCard();
+        }
 
         // 2. Camera Tilt Logic
         RayCast3D rightRay = Player.GetNode<RayCast3D>("WallChecks/RightWall");

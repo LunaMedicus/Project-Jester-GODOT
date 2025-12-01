@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=13 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
+[ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
 [ext_resource type="Script" uid="uid://dru8jgjek53cw" path="res://Scripts/States/IdleState.cs" id="2_sweqy"]
 [ext_resource type="Script" uid="uid://ctv6t1go4ty0j" path="res://Scripts/States/WalkState.cs" id="3_2hs0m"]
 [ext_resource type="Script" uid="uid://d16a0bswvxosg" path="res://Scripts/States/AirState.cs" id="4_1jxqw"]
@@ -16,12 +17,11 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
 albedo_color = Color(0.827451, 0, 0, 1)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("GameplayCamera")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("RightHandPos", "LeftHandPos", "GameplayCamera") groups=["Player"]]
 script = ExtResource("1_hqtel")
-DiveVerticalSpeed = 10.0
-DiveRollSpeed = 15.0
-DiveForwardSpeed = 30.0
-MinDiveTimeForRoll = 0.05
+CardScene = ExtResource("2_b26j0")
+RightHandPos = NodePath("Camera3D/RightHandPos")
+LeftHandPos = NodePath("Camera3D/LeftHandPos")
 GameplayCamera = NodePath("Camera3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -29,7 +29,13 @@ shape = SubResource("CapsuleShape3D_sh265")
 debug_color = Color(0.34271184, 0.62123054, 0, 0.41960785)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.8464794, 2.2374122)
+transform = Transform3D(1, 0, 0, 0, 0.93524647, 0.35399723, 0, -0.35399723, 0.93524647, 0, 1.7997837, 2.0313382)
+
+[node name="RightHandPos" type="Node3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85558885, -0.59990895, -2.9566665)
+
+[node name="LeftHandPos" type="Node3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99592006, -0.59990895, -2.9566665)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_4flbx")
