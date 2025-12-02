@@ -74,6 +74,11 @@ shadow_enabled = true
 
 [node name="Player" parent="." instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6989336, 1.5379684, 1.1073625)
+JumpVelocity = 10.0
+WallJumpForce = 10.0
+WallRunSpeed = 30.0
+DiveRollSpeed = 12.0
+DiveRollDuration = 0.3
 
 [node name="FloatingMask" parent="." instance=ExtResource("2_uu6xs")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.192696, 1.8265381, -61.972588)
