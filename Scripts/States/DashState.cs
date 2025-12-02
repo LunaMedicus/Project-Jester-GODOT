@@ -42,7 +42,7 @@ public partial class DashState : BaseState
         // transition to slide (DiveRoll) for momentum preservation
         if (Player.IsOnFloor() && Input.IsActionJustPressed("dash"))
         {
-            Player.ChangeState(Player.StateDiveRoll);
+            Player.ChangeMoveState(Player.StateDiveRoll);
             return;
         }
 
@@ -51,9 +51,9 @@ public partial class DashState : BaseState
         {
             // Transition based on remaining velocity
             if (Player.Velocity.Length() > 0.1f)
-                Player.ChangeState(Player.StateWalk);  // Still moving -> Walk
+                Player.ChangeMoveState(Player.StateWalk);  // Still moving -> Walk
             else
-                Player.ChangeState(Player.StateIdle);  // Stopped -> Idle
+                Player.ChangeMoveState(Player.StateIdle);  // Stopped -> Idle
         }
     }
 

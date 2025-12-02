@@ -18,17 +18,14 @@ public partial class WalkState : BaseState
         // Check these first before processing movement
 
         // Fell off edge -> Air state
-        if (!Player.IsOnFloor()) { Player.ChangeState(Player.StateAir); return; }
+        if (!Player.IsOnFloor()) { Player.ChangeMoveState(Player.StateAir); return; }
 
         // Jump input -> Jump state
-        if (Input.IsActionJustPressed("ui_accept")) { Player.ChangeState(Player.StateJump); return; }
+        if (Input.IsActionJustPressed("ui_accept")) { Player.ChangeMoveState(Player.StateJump); return; }
 
         // Dash input -> Dash state
-        if (Input.IsActionJustPressed("dash")) { Player.ChangeState(Player.StateDash); return; }
-
-        // Attack input -> Attack state
-        if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
-
+        if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDash); return; }
+        
         // === Movement Processing ===
         // Get raw input and convert to camera-relative direction
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
@@ -56,7 +53,7 @@ public partial class WalkState : BaseState
         else
         {
             // No input -> return to idle
-            Player.ChangeState(Player.StateIdle);
+            Player.ChangeMoveState(Player.StateIdle);
         }
     }
 

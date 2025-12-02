@@ -20,10 +20,7 @@ public partial class JumpState : BaseState
         // === State Transition Checks ===
 
         // Dash during jump -> Dive
-        if (Input.IsActionJustPressed("dash")) { Player.ChangeState(Player.StateDive); return; }
-
-        // Attack during jump -> Throw card
-        if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
+        if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
 
         // === Variable Jump Height ===
         // If player releases jump button early while still ascending,
@@ -61,7 +58,7 @@ public partial class JumpState : BaseState
         // When vertical velocity becomes negative, we're falling
         if (Player.Velocity.Y < 0)
         {
-            Player.ChangeState(Player.StateAir);
+            Player.ChangeMoveState(Player.StateAir);
             return;
         }
 
@@ -70,9 +67,9 @@ public partial class JumpState : BaseState
         if (Player.IsOnFloor())
         {
             if (inputDir == Vector2.Zero)
-                Player.ChangeState(Player.StateIdle);
+                Player.ChangeMoveState(Player.StateIdle);
             else
-                Player.ChangeState(Player.StateWalk);
+                Player.ChangeMoveState(Player.StateWalk);
         }
     }
 

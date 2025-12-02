@@ -1,21 +1,14 @@
 using Godot;
+using System;
 
 /// <summary>
-/// Main player controller using a finite state machine architecture.
-/// Handles all player movement, combat, and state transitions.
+/// Main player controller using a Dual Finite State Machine architecture.
+/// Handles physics, input routing, and global configuration.
 /// 
-/// State Machine Pattern:
-/// - Each state (Idle, Walk, Jump, etc.) handles its own logic
-/// - States can transition to other states via ChangeState()
-/// - All config values are centralized here and accessed by states via Player reference
-/// 
-/// Node Structure Expected:
-/// - StateMachine/ (container for all state nodes)
-///   - Idle, Walk, Air, Jump, WallRun, Dash, Dive, DiveRoll, Attack
-/// - WallChecks/ (raycasts for wall detection)
-///   - RightWall, LeftWall
-/// - Visuals (3D model for rotation)
-/// - CameraRig (camera controller reference)
+/// Architecture:
+/// - MoveFSM: Handles Legs (Idle, Walk, Air, WallRun, Dash, Dive).
+/// - ActionFSM: Handles Arms (ActionIdle, Attack).
+/// - Both FSMs run simultaneously every frame.
 /// </summary>
 public partial class PlayerController : CharacterBody3D
 {
@@ -125,121 +118,112 @@ public partial class PlayerController : CharacterBody3D
 	#endregion
 
 	#region State Machine
-	/// <summary>The currently active state.</summary>
-	private BaseState _currentState;
+	/// <summary>The currently active movement state (Legs).</summary>
+	private BaseState _currentMoveState;
+	
+	/// <summary>The currently active action state (Arms).</summary>
+	private BaseState _currentActionState;
 	
 	// === State References ===
-	// These are populated in _Ready() from child nodes
-	
-	/// <summary>Standing still on ground.</summary>
 	public BaseState StateIdle;
-	
-	/// <summary>Walking/running on ground.</summary>
 	public BaseState StateWalk;
-	
-	/// <summary>Falling through the air.</summary>
 	public BaseState StateAir;
-	
-	/// <summary>Ascending from a jump.</summary>
 	public BaseState StateJump;
-	
-	/// <summary>Running along walls.</summary>
 	public BaseState StateWallRun;
-	
-	/// <summary>Quick horizontal dash.</summary>
 	public BaseState StateDash;
-	
-	/// <summary>Aerial dive attack.</summary>
 	public BaseState StateDive;
-	
-	/// <summary>Ground roll (after dive or slide hop).</summary>
 	public BaseState StateDiveRoll;
 	
-	/// <summary>Throwing card projectile.</summary>
+	// Action States
+	public BaseState StateActionIdle;
 	public BaseState StateAttack;
 
-	/// <summary>Normal vector of the wall being touched (for wall run/jump).</summary>
+	/// <summary>Normal vector of the wall being touched.</summary>
 	public Vector3 WallNormal;
 	#endregion
 
 	/// <summary>
 	/// Called when the node enters the scene tree.
-	/// Initializes all states and starts in IdleState.
+	/// Initializes all states and starts machines.
 	/// </summary>
 	public override void _Ready()
 	{
-		// === Get State References ===
-		// States are child nodes under StateMachine container
-		StateIdle = GetNode<BaseState>("StateMachine/Idle");
-		StateWalk = GetNode<BaseState>("StateMachine/Walk");
-		StateAir = GetNode<BaseState>("StateMachine/Air");
-		StateJump = GetNode<BaseState>("StateMachine/Jump");
-		StateWallRun = GetNode<BaseState>("StateMachine/WallRun");
-		StateDash = GetNode<BaseState>("StateMachine/Dash");
-		StateDive = GetNode<BaseState>("StateMachine/Dive");
-		StateDiveRoll = GetNode<BaseState>("StateMachine/DiveRoll");
-		StateAttack = GetNode<BaseState>("StateMachine/Attack");
+	   // === Get State References ===
+	   StateIdle = GetNode<BaseState>("MoveFSM/Idle");
+	   StateWalk = GetNode<BaseState>("MoveFSM/Walk");
+	   StateAir = GetNode<BaseState>("MoveFSM/Air");
+	   StateJump = GetNode<BaseState>("MoveFSM/Jump");
+	   StateWallRun = GetNode<BaseState>("MoveFSM/WallRun");
+	   StateDash = GetNode<BaseState>("MoveFSM/Dash");
+	   StateDive = GetNode<BaseState>("MoveFSM/Dive");
+	   StateDiveRoll = GetNode<BaseState>("MoveFSM/DiveRoll");
+	   
+	   StateActionIdle = GetNode<BaseState>("ActionFSM/ActionIdle");
+	   StateAttack = GetNode<BaseState>("ActionFSM/Attack");
 
-		// === Initialize States ===
-		// Give each state a reference to this controller
-		StateIdle.Init(this);
-		StateWalk.Init(this);
-		StateAir.Init(this);
-		StateJump.Init(this);
-		StateWallRun.Init(this);
-		StateDash.Init(this);
-		StateDive.Init(this);
-		StateDiveRoll.Init(this);
-		StateAttack.Init(this);
+	   // === Initialize States ===
+	   StateIdle.Init(this);
+	   StateWalk.Init(this);
+	   StateAir.Init(this);
+	   StateJump.Init(this);
+	   StateWallRun.Init(this);
+	   StateDash.Init(this);
+	   StateDive.Init(this);
+	   StateDiveRoll.Init(this);
+	   StateActionIdle.Init(this);
+	   StateAttack.Init(this);
 
-		// Start in idle state
-		ChangeState(StateIdle);
+	   // Start State Machines
+	   ChangeMoveState(StateIdle);
+	   ChangeActionState(StateActionIdle);
+	   
+	   Input.MouseMode = Input.MouseModeEnum.Captured;
 	}
-
+	
+	public override void _UnhandledInput(InputEvent @event)
+	{
+	   // Handled by CameraRig.cs
+	}
+	
 	/// <summary>
-	/// Physics update called every physics frame (fixed timestep).
-	/// Delegates to current state and applies movement.
+	/// Physics update called every physics frame.
+	/// Runs logic for both state machines.
 	/// </summary>
 	public override void _PhysicsProcess(double delta)
 	{
-		// Let current state handle physics logic
-		_currentState.PhysicsUpdate(delta);
-		
-		// Apply velocity and handle collisions
-		MoveAndSlide();
+	   _currentMoveState.PhysicsUpdate(delta);
+	   _currentActionState.PhysicsUpdate(delta);
+	   
+	   MoveAndSlide();
 	}
 
 	/// <summary>
 	/// Frame update called every render frame.
-	/// Used for non-physics updates and input handling.
 	/// </summary>
 	public override void _Process(double delta)
 	{
-		// Let current state handle frame updates
-		_currentState.Update(delta);
+	   _currentMoveState.Update(delta);
+	   _currentActionState.Update(delta);
 
-		// === Debug: Scene Reset ===
-		// Press Reset key to reload the scene (useful for testing)
-		if (Input.IsActionJustPressed("Reset"))
-		{
-			GetTree().ReloadCurrentScene();
-		}
+	   if (Input.IsActionJustPressed("Reset"))
+	   {
+		  GetTree().ReloadCurrentScene();
+	   }
 	}
 
-	/// <summary>
-	/// Transitions from current state to a new state.
-	/// Calls Exit() on old state and Enter() on new state.
-	/// </summary>
-	/// <param name="newState">The state to transition to.</param>
-	public void ChangeState(BaseState newState)
+	/// <summary>Transitions the Movement State (Legs).</summary>
+	public void ChangeMoveState(BaseState newState)
 	{
-		// Exit current state (if any)
-		_currentState?.Exit();
-		
-		// Switch to new state
-		_currentState = newState;
-		
-		// Enter new state
-		_currentState.Enter();
+	   if (_currentMoveState != null) _currentMoveState.Exit();
+	   _currentMoveState = newState;
+	   _currentMoveState.Enter();
+	}
+
+	/// <summary>Transitions the Action State (Arms).</summary>
+	public void ChangeActionState(BaseState newState)
+	{
+	   if (_currentActionState != null) _currentActionState.Exit();
+	   _currentActionState = newState;
+	   _currentActionState.Enter();
 	}
 }

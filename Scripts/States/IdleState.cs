@@ -20,7 +20,7 @@ public partial class IdleState : BaseState
         // If we walked off an edge, start falling
         if (!Player.IsOnFloor())
         {
-            Player.ChangeState(Player.StateAir);
+            Player.ChangeMoveState(Player.StateAir);
             return;
         }
 
@@ -29,21 +29,14 @@ public partial class IdleState : BaseState
         // Jump input (spacebar/ui_accept)
         if (Input.IsActionJustPressed("ui_accept"))
         {
-            Player.ChangeState(Player.StateJump);
+            Player.ChangeMoveState(Player.StateJump);
             return;
         }
 
         // Dash input
         if (Input.IsActionJustPressed("dash"))
         {
-            Player.ChangeState(Player.StateDash);
-            return;
-        }
-
-        // Attack input
-        if (Input.IsActionJustPressed("attack"))
-        {
-            Player.ChangeState(Player.StateAttack);
+            Player.ChangeMoveState(Player.StateDash);
             return;
         }
 
@@ -51,7 +44,7 @@ public partial class IdleState : BaseState
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         if (inputDir != Vector2.Zero)
         {
-            Player.ChangeState(Player.StateWalk);
+            Player.ChangeMoveState(Player.StateWalk);
         }
     }
 

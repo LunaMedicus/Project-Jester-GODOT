@@ -17,10 +17,8 @@ public partial class AirState : BaseState
 		// === State Transition Checks ===
 
 		// Dash in air -> Dive attack
-		if (Input.IsActionJustPressed("dash")) { Player.ChangeState(Player.StateDive); return; }
-
-		// Attack in air -> Throw card
-		if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
+		if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
+		
 
 		// === Apply Gravity ===
 		// Pull player downward each frame
@@ -50,9 +48,9 @@ public partial class AirState : BaseState
 		if (Player.IsOnFloor())
 		{
 			if (inputDir == Vector2.Zero)
-				Player.ChangeState(Player.StateIdle);   // No input -> Idle
+				Player.ChangeMoveState(Player.StateIdle);   // No input -> Idle
 			else
-				Player.ChangeState(Player.StateWalk);   // Has input -> Walk
+				Player.ChangeMoveState(Player.StateWalk);   // Has input -> Walk
 		}
 	}
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=18 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://dhh461tahccl3" path="res://Scripts/States/DiveRollState.cs" id="8_n7ghd"]
 [ext_resource type="Script" uid="uid://ccq368jymee7r" path="res://Scripts/States/AttackState.cs" id="10_n7ghd"]
 [ext_resource type="Script" uid="uid://bgo3vshoyb50l" path="res://Scripts/States/JumpState.cs" id="12_ivps1"]
+[ext_resource type="Script" uid="uid://dd1ejxnoh6vv3" path="res://Scripts/States/ActionIdleState.cs" id="12_urp6f"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 
@@ -62,34 +63,39 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99592006, -0.59990895, -2.
 mesh = SubResource("CapsuleMesh_4flbx")
 surface_material_override/0 = SubResource("StandardMaterial3D_hqtel")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="MoveFSM" type="Node" parent="."]
 
-[node name="Idle" type="Node" parent="StateMachine"]
+[node name="Idle" type="Node" parent="MoveFSM"]
 script = ExtResource("2_sweqy")
 
-[node name="Walk" type="Node" parent="StateMachine"]
+[node name="Walk" type="Node" parent="MoveFSM"]
 script = ExtResource("3_2hs0m")
 
-[node name="Air" type="Node" parent="StateMachine"]
+[node name="Air" type="Node" parent="MoveFSM"]
 script = ExtResource("4_1jxqw")
 
-[node name="WallRun" type="Node" parent="StateMachine"]
+[node name="WallRun" type="Node" parent="MoveFSM"]
 script = ExtResource("5_sweqy")
 
-[node name="Dash" type="Node" parent="StateMachine"]
+[node name="Dash" type="Node" parent="MoveFSM"]
 script = ExtResource("6_dw050")
 
-[node name="Dive" type="Node" parent="StateMachine"]
+[node name="Dive" type="Node" parent="MoveFSM"]
 script = ExtResource("7_b26j0")
 
-[node name="DiveRoll" type="Node" parent="StateMachine"]
+[node name="DiveRoll" type="Node" parent="MoveFSM"]
 script = ExtResource("8_n7ghd")
 
-[node name="Attack" type="Node" parent="StateMachine"]
-script = ExtResource("10_n7ghd")
-
-[node name="Jump" type="Node" parent="StateMachine"]
+[node name="Jump" type="Node" parent="MoveFSM"]
 script = ExtResource("12_ivps1")
+
+[node name="ActionFSM" type="Node" parent="."]
+
+[node name="ActionIdle" type="Node" parent="ActionFSM"]
+script = ExtResource("12_urp6f")
+
+[node name="Attack" type="Node" parent="ActionFSM"]
+script = ExtResource("10_n7ghd")
 
 [node name="WallChecks" type="Node3D" parent="."]
 

@@ -108,14 +108,14 @@ public partial class DiveRollState : BaseState
             {
                 // Transition based on remaining momentum
                 if (Player.Velocity.Length() > 0.1f)
-                    Player.ChangeState(Player.StateWalk);  // Still moving -> Walk
+                    Player.ChangeMoveState(Player.StateWalk);  // Still moving -> Walk
                 else
-                    Player.ChangeState(Player.StateIdle);  // Stopped -> Idle
+                    Player.ChangeMoveState(Player.StateIdle);  // Stopped -> Idle
             }
             else
             {
                 // Rolled off an edge -> Fall
-                Player.ChangeState(Player.StateAir);
+                Player.ChangeMoveState(Player.StateAir);
             }
         }
     }

@@ -35,7 +35,6 @@ public partial class WallRunState : BaseState
         // === State Transitions ===
         if (Input.IsActionJustPressed("ui_accept")) { WallJump(); return; }
         if (Input.IsActionJustPressed("dash")) { WallDive(); return; }
-        if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
 
         // === Camera Tilt ===
         RayCast3D rightRay = Player.GetNode<RayCast3D>("WallChecks/RightWall");
@@ -66,7 +65,7 @@ public partial class WallRunState : BaseState
         // === Exit Check ===
         if (!(rightRay.IsColliding() || leftRay.IsColliding()) || Player.IsOnFloor())
         {
-            Player.ChangeState(Player.StateAir);
+            Player.ChangeMoveState(Player.StateAir);
         }
     }
 
@@ -88,14 +87,14 @@ public partial class WallRunState : BaseState
         }
 
         Player.Velocity = jumpVelocity;
-        Player.ChangeState(Player.StateAir);
+        Player.ChangeMoveState(Player.StateAir);
     }
 
     /// <summary>Push off wall and dive.</summary>
     private void WallDive()
     {
         Player.Velocity += Player.WallNormal * 5.0f;
-        Player.ChangeState(Player.StateDive);
+        Player.ChangeMoveState(Player.StateDive);
     }
 
     /// <summary>Tilts camera based on which wall we're touching.</summary>

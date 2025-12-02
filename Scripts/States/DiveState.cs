@@ -73,13 +73,13 @@ public partial class DiveState : BaseState
         if (rightRay.IsColliding())
         {
             Player.WallNormal = rightRay.GetCollisionNormal();
-            Player.ChangeState(Player.StateWallRun);
+            Player.ChangeMoveState(Player.StateWallRun);
             return;
         }
         if (leftRay.IsColliding())
         {
             Player.WallNormal = leftRay.GetCollisionNormal();
-            Player.ChangeState(Player.StateWallRun);
+            Player.ChangeMoveState(Player.StateWallRun);
             return;
         }
 
@@ -89,7 +89,7 @@ public partial class DiveState : BaseState
         {
             // Reduce velocity to 20% (bonk penalty)
             Player.Velocity = new Vector3(Player.Velocity.X * 0.2f, 0, Player.Velocity.Z * 0.2f);
-            Player.ChangeState(Player.StateAir);
+            Player.ChangeMoveState(Player.StateAir);
             return;
         }
 
@@ -100,15 +100,15 @@ public partial class DiveState : BaseState
             // Roll if: dived long enough AND holding dash button
             if (_timeSpentDiving >= Player.MinDiveTimeForRoll && Input.IsActionPressed("dash"))
             {
-                Player.ChangeState(Player.StateDiveRoll);  // Roll preserves momentum
+                Player.ChangeMoveState(Player.StateDiveRoll);  // Roll preserves momentum
             }
             else
             {
                 // No roll - transition based on velocity
                 if (Player.Velocity.Length() > 0.1f)
-                    Player.ChangeState(Player.StateWalk);
+                    Player.ChangeMoveState(Player.StateWalk);
                 else
-                    Player.ChangeState(Player.StateIdle);
+                    Player.ChangeMoveState(Player.StateIdle);
             }
         }
     }
