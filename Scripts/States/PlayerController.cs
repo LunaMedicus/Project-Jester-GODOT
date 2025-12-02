@@ -54,6 +54,9 @@ public partial class PlayerController : CharacterBody3D
 	
 	/// <summary>Speed while running along walls.</summary>
 	[Export] public float WallRunSpeed = 10.0f;
+	
+	/// <summary>How much input direction influences wall jump (0 = none, 1 = full).</summary>
+	[Export] public float WallJumpInputInfluence = 0.5f;
 	#endregion
 
 	#region Dash Settings

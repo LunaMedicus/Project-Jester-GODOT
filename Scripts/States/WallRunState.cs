@@ -1,111 +1,115 @@
 using Godot;
-using System;
 
+/// <summary>
+/// State for wall running.
+/// Player can run along walls, jump off, or dive away.
+/// Direction is locked on entry based on camera facing.
+/// </summary>
 public partial class WallRunState : BaseState
 {
-    private float _directionMultiplier; // 1 = Forward along wall, -1 = Backward along wall
+    /// <summary>Direction multiplier: 1 = forward along wall, -1 = backward.</summary>
+    private float _directionMultiplier;
 
     public override void Enter()
     {
         GD.Print("Entered WallRun");
+        
+        // Small upward velocity to stick to wall initially
         Player.Velocity = new Vector3(Player.Velocity.X, 0.5f, Player.Velocity.Z);
 
-        // --- DIRECTION LOCKING LOGIC ---
-        // 1. Calculate the natural "Tangent" of the wall (Horizontal line along the wall)
-        // We use Cross Product of WallNormal and Up to find the perpendicular line.
+        // === Direction Locking ===
+        // Lock run direction on entry so player can't flip mid-run
+        
+        // Calculate wall tangent (horizontal line along wall surface)
         Vector3 wallTangent = Player.WallNormal.Cross(Vector3.Up).Normalized();
 
-        // 2. Compare with Camera direction
+        // Compare with camera direction to determine which way to run
         Vector3 camForward = -Player.CameraRig.GameplayCamera.GlobalTransform.Basis.Z;
         
-        // Dot Product check: Are we looking somewhat in the same direction as the Tangent?
-        if (wallTangent.Dot(camForward) > 0)
-        {
-            _directionMultiplier = 1.0f; // Run "Right" relative to wall
-        }
-        else
-        {
-            _directionMultiplier = -1.0f; // Run "Left" relative to wall
-        }
-        // Now _directionMultiplier is LOCKED until we leave the wall.
+        // Dot product: positive = same direction, negative = opposite
+        _directionMultiplier = wallTangent.Dot(camForward) > 0 ? 1.0f : -1.0f;
     }
 
     public override void PhysicsUpdate(double delta)
     {
-        // 1. Jump Logic
-        if (Input.IsActionJustPressed("ui_accept"))
-        {
-            Vector3 jumpDir = (Player.WallNormal * Player.WallJumpForce) + (Vector3.Up * Player.JumpVelocity);
-            Player.Velocity = jumpDir;
-            Player.ChangeState(Player.StateAir);
-            return;
-        }
-        
-        // 2. Dive
-        if (Input.IsActionJustPressed("dash"))
-        {
-            Player.Velocity += Player.WallNormal * 5.0f;
-            Player.ChangeState(Player.StateDive);
-            return;
-        }
-        
-        // 3. Attack
+        // === State Transitions ===
+        if (Input.IsActionJustPressed("ui_accept")) { WallJump(); return; }
+        if (Input.IsActionJustPressed("dash")) { WallDive(); return; }
         if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
 
-        // 4. Camera Tilt
+        // === Camera Tilt ===
         RayCast3D rightRay = Player.GetNode<RayCast3D>("WallChecks/RightWall");
         RayCast3D leftRay = Player.GetNode<RayCast3D>("WallChecks/LeftWall");
+        ApplyCameraTilt(rightRay.IsColliding(), leftRay.IsColliding());
 
-        if (rightRay.IsColliding())
-            Player.CameraRig.TargetTilt = Mathf.DegToRad(Player.CameraRig.TiltSpeed);   
-        else if (leftRay.IsColliding())
-            Player.CameraRig.TargetTilt = Mathf.DegToRad(-Player.CameraRig.TiltSpeed);  
-
-        // 5. Movement & Gravity
+        // === Movement ===
         Vector3 velocity = Player.Velocity;
         velocity.Y -= Player.WallRunGravity * (float)delta;
 
-        // --- LOCKED MOVEMENT LOGIC ---
-        
-        // Only allow movement if holding "Forward" (W)
         if (Input.IsActionPressed("ui_up"))
         {
-            // Calculate the path along the wall using our LOCKED multiplier
-            // We recalculate the Cross Product every frame so we can run around CURVED walls
-            Vector3 currentTangent = Player.WallNormal.Cross(Vector3.Up).Normalized() * _directionMultiplier;
-
-            velocity.X = currentTangent.X * Player.WallRunSpeed;
-            velocity.Z = currentTangent.Z * Player.WallRunSpeed;
-
-            // Rotate Visuals to face the direction we are running
-            if (Player.Visuals != null)
-            {
-                float targetAngle = Mathf.Atan2(currentTangent.X, currentTangent.Z);
-                Vector3 rotation = Player.Visuals.Rotation;
-                rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
-                Player.Visuals.Rotation = rotation;
-            }
+            // Run along wall using locked direction (recalculate tangent for curved walls)
+            Vector3 runDirection = Player.WallNormal.Cross(Vector3.Up).Normalized() * _directionMultiplier;
+            velocity.X = runDirection.X * Player.WallRunSpeed;
+            velocity.Z = runDirection.Z * Player.WallRunSpeed;
+            RotateVisuals(runDirection, delta);
         }
         else
         {
-            // If we stop holding W, we just slide down (friction)
+            // No input - apply friction (slide to stop)
             velocity.X = Mathf.MoveToward(velocity.X, 0, 10.0f * (float)delta);
             velocity.Z = Mathf.MoveToward(velocity.Z, 0, 10.0f * (float)delta);
         }
 
         Player.Velocity = velocity;
 
-        // 6. Exit Check
-        bool isTouchingWall = rightRay.IsColliding() || leftRay.IsColliding();
-        if (!isTouchingWall || Player.IsOnFloor())
+        // === Exit Check ===
+        if (!(rightRay.IsColliding() || leftRay.IsColliding()) || Player.IsOnFloor())
         {
             Player.ChangeState(Player.StateAir);
         }
     }
 
-    public override void Update(double delta) {}
-    
-    public override void Exit() 
+    /// <summary>Jump away from wall, influenced by input direction.</summary>
+    private void WallJump()
+    {
+        // Get input direction relative to camera
+        Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        Vector3 inputDirection = GetCameraRelativeDirection(inputDir);
+
+        // Combine: wall push + upward velocity + input direction
+        Vector3 jumpVelocity = (Player.WallNormal * Player.WallJumpForce) + (Vector3.Up * Player.JumpVelocity);
+        
+        if (inputDirection != Vector3.Zero)
+        {
+            // Add horizontal influence from input (controlled by WallJumpInputInfluence)
+            jumpVelocity.X += inputDirection.X * Player.WallJumpForce * Player.WallJumpInputInfluence;
+            jumpVelocity.Z += inputDirection.Z * Player.WallJumpForce * Player.WallJumpInputInfluence;
+        }
+
+        Player.Velocity = jumpVelocity;
+        Player.ChangeState(Player.StateAir);
+    }
+
+    /// <summary>Push off wall and dive.</summary>
+    private void WallDive()
+    {
+        Player.Velocity += Player.WallNormal * 5.0f;
+        Player.ChangeState(Player.StateDive);
+    }
+
+    /// <summary>Tilts camera based on which wall we're touching.</summary>
+    private void ApplyCameraTilt(bool rightWall, bool leftWall)
+    {
+        if (rightWall)
+            Player.CameraRig.TargetTilt = Mathf.DegToRad(Player.CameraRig.TiltSpeed);
+        else if (leftWall)
+            Player.CameraRig.TargetTilt = Mathf.DegToRad(-Player.CameraRig.TiltSpeed);
+    }
+
+    public override void Update(double delta) { }
+
+    public override void Exit()
     {
         Player.CameraRig.TargetTilt = 0f;
     }
