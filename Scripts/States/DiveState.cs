@@ -30,7 +30,7 @@ public partial class DiveState : BaseState
             // If no input, maintain momentum or lunge forward
             Vector3 horizontalVelocity = new Vector3(Player.Velocity.X, 0, Player.Velocity.Z);
             if (horizontalVelocity.Length() > 0.1f) lungeDir = horizontalVelocity.Normalized();
-            else lungeDir = -Player.Visuals.GlobalTransform.Basis.Z; 
+            else lungeDir = camForward;
         }
 
         Player.Velocity = new Vector3(

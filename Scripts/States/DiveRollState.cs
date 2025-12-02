@@ -14,10 +14,18 @@ public partial class DiveRollState : BaseState
         // 1. Determine Slide Direction
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
 
+        // Camera Relative Roll
+        Vector3 camForward = -Player.CameraRig.GameplayCamera.GlobalTransform.Basis.Z;
+        Vector3 camRight = Player.CameraRig.GameplayCamera.GlobalTransform.Basis.X;
+        camForward.Y = 0;
+        camRight.Y = 0;
+        camRight = camRight.Normalized();
+        camForward = camForward.Normalized();
+
         if (inputDir != Vector2.Zero)
         {
-            // Scenario A: Holding stick -> Roll towards stick
-            _slideDirection = (Player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
+            // Scenario A: Holding stick -> Roll towards stick (camera relative)
+            _slideDirection = (camForward * -inputDir.Y + camRight * inputDir.X).Normalized();
         }
         else
         {
@@ -31,8 +39,8 @@ public partial class DiveRollState : BaseState
             }
             else
             {
-                // If standing still, roll forward
-                _slideDirection = -Player.Transform.Basis.Z;
+                // If standing still, roll forward relative to camera
+                _slideDirection = camForward;
             }
         }
 
