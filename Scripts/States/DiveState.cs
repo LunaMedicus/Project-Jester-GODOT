@@ -78,7 +78,7 @@ public partial class DiveState : BaseState
         }
 
         // Transition: Hit the Floor
-        if (Player.IsOnFloor())
+        if (Player.IsOnFloor() && _timeSpentDiving >= 0.1f)
         {
             // Only transition to DiveRoll if dash button is pressed during landing
             if (_timeSpentDiving >= Player.MinDiveTimeForRoll && Input.IsActionPressed("dash"))

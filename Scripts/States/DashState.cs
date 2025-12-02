@@ -27,7 +27,7 @@ public partial class DashState : BaseState
         else
         {
             // Dash Forward relative to Visuals
-            dashDir = -Player.Visuals.GlobalTransform.Basis.Z; 
+            dashDir = -Player.Visuals.GlobalTransform.Basis.Z;
         }
 
         Player.Velocity = new Vector3(dashDir.X * Player.DashSpeed, 0, dashDir.Z * Player.DashSpeed);
@@ -38,8 +38,8 @@ public partial class DashState : BaseState
         _timer -= delta;
 
         // --- SLIDE HOP LOGIC ---
-        // If we touch the ground while Dashing -> SLIDE!
-        if (Player.IsOnFloor())
+        // If we touch the ground while Dashing and press dash during dashing -> SLIDE!
+        if (Player.IsOnFloor() && Input.IsActionJustPressed("dash"))
         {
             Player.ChangeState(Player.StateDiveRoll);
             return;
