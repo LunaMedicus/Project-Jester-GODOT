@@ -24,6 +24,8 @@ albedo_color = Color(0.827451, 0, 0, 1)
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Visuals", "CameraRig", "RightHandPos", "LeftHandPos") groups=["Player"]]
 collision_layer = 2
 script = ExtResource("1_hqtel")
+DiveRollSpeed = 30.0
+DiveRollDuration = 1.0
 Visuals = NodePath("MeshInstance3D")
 CameraRig = NodePath("CamOrigin")
 CardScene = ExtResource("2_b26j0")
