@@ -14,26 +14,40 @@ public partial class CardProjectile : RigidBody3D
 	/// <summary>Initial launch velocity magnitude.</summary>
 	[Export] public float LaunchSpeed = 40.0f;
 
+	// --- SAFETY SWITCH ---
+	// Prevents the card from exploding the micro-second it spawns
+	private bool _canHit = false;
+
 	/// <summary>
 	/// Called when the card spawns into the scene.
 	/// Sets up auto-destroy timer and collision handling.
 	/// </summary>
 	public override void _Ready()
 	{
-		// === 1. Detach from Parent ===
-		// TopLevel = true makes this node independent from parent transforms
-		// Ensures card doesn't stick to or follow the player
-		TopLevel = true;
-		
-		// === 2. Auto-Destroy Timer ===
-		// Delete card after 5 seconds to prevent memory leaks
-		// and clean up missed projectiles
-		GetTree().CreateTimer(5.0f).Timeout += QueueFree;
-		
-		// === 3. Connect Hitbox Signal ===
-		// The Hitbox is an Area3D child that detects collisions
-		// This allows us to handle hits without stopping the card's physics
-		GetNode<Area3D>("Hitbox").BodyEntered += OnHit;
+	   // === 1. Detach from Parent ===
+	   // TopLevel = true makes this node independent from parent transforms
+	   // Ensures card doesn't stick to or follow the player
+	   TopLevel = true;
+	   
+	   // === 2. Auto-Destroy Timer ===
+	   // Delete card after 5 seconds to prevent memory leaks
+	   GetTree().CreateTimer(5.0f).Timeout += QueueFree;
+
+	   // === 3. Safety Timer (THE FIX) ===
+	   // Wait 0.1s before allowing collision logic.
+	   // This gives the card time to leave the player's hand/collision box.
+	   GetTree().CreateTimer(0.1f).Timeout += EnableHit;
+	   
+	   // === 4. Connect Hitbox Signal ===
+	   GetNode<Area3D>("Hitbox").BodyEntered += OnHit;
+	}
+
+	/// <summary>
+	/// Enables the collision logic after the short delay.
+	/// </summary>
+	private void EnableHit()
+	{
+		_canHit = true;
 	}
 
 	/// <summary>
@@ -43,27 +57,26 @@ public partial class CardProjectile : RigidBody3D
 	/// <param name="body">The body that was hit.</param>
 	private void OnHit(Node3D body)
 	{
-		// === 1. Ignore Self ===
-		// Prevent the hitbox from detecting the card itself
-		if (body == this) return; 
+	   // === 0. Safety Check ===
+	   // If the timer hasn't finished, ignore ALL collisions (floor, player, etc.)
+	   if (!_canHit) return;
 
-		// === 2. Ignore Player ===
-		// Don't damage the player who threw the card
-		// Uses group check for flexibility
-		if (body.IsInGroup("Player")) return; 
+	   // === 1. Ignore Self ===
+	   if (body == this) return; 
 
-		GD.Print("Card hit: " + body.Name);
-		
-		// === 3. Enemy Damage Check ===
-		// If we hit an enemy with the FloatingMask script, deal damage
-		// This uses C# pattern matching ("is" keyword)
-		if (body is FloatingMask enemy)
-		{
-			enemy.TakeDamage(Damage);
-		}
-		
-		// === 4. Destroy Card ===
-		// Card is destroyed on any collision (even non-enemies)
-		QueueFree();
+	   // === 2. Ignore Player ===
+	   // Don't damage the player who threw the card
+	   if (body.IsInGroup("Player")) return; 
+
+	   GD.Print("Card hit: " + body.Name);
+	   
+	   // === 3. Enemy Damage Check ===
+	   if (body is FloatingMask enemy)
+	   {
+		  enemy.TakeDamage(Damage);
+	   }
+	   
+	   // === 4. Destroy Card ===
+	   QueueFree();
 	}
 }
