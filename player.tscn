@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=17 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://dn83ltp68v6ue" path="res://Scripts/States/DiveState.cs" id="7_b26j0"]
 [ext_resource type="Script" uid="uid://dhh461tahccl3" path="res://Scripts/States/DiveRollState.cs" id="8_n7ghd"]
 [ext_resource type="Script" uid="uid://ccq368jymee7r" path="res://Scripts/States/AttackState.cs" id="10_n7ghd"]
+[ext_resource type="Script" uid="uid://bgo3vshoyb50l" path="res://Scripts/States/JumpState.cs" id="12_ivps1"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 
@@ -86,6 +87,9 @@ script = ExtResource("8_n7ghd")
 
 [node name="Attack" type="Node" parent="StateMachine"]
 script = ExtResource("10_n7ghd")
+
+[node name="Jump" type="Node" parent="StateMachine"]
+script = ExtResource("12_ivps1")
 
 [node name="WallChecks" type="Node3D" parent="."]
 

@@ -1,39 +1,46 @@
 using Godot;
 
+/// <summary>
+/// State for when the player is standing still on the ground.
+/// Default state - transitions to other states based on input.
+/// </summary>
 public partial class IdleState : BaseState
 {
     public override void Enter()
     {
         GD.Print("Entered Idle");
-        // Reset horizontal velocity, but keep gravity (y)
+
+        // Stop horizontal movement but preserve vertical velocity (for landing)
         Player.Velocity = new Vector3(0, Player.Velocity.Y, 0);
     }
 
     public override void PhysicsUpdate(double delta)
     {
-        // Apply Gravity
+        // === Ground Check ===
+        // If we walked off an edge, start falling
         if (!Player.IsOnFloor())
         {
             Player.ChangeState(Player.StateAir);
             return;
         }
 
-        // Check for Jump
-        if (Input.IsActionJustPressed("ui_accept")) // Spacebar
+        // === Input Checks for State Transitions ===
+
+        // Jump input (spacebar/ui_accept)
+        if (Input.IsActionJustPressed("ui_accept"))
         {
-            // We will implement Jump logic later, for now just switch to Air
-            Player.Velocity = new Vector3(0, Player.JumpVelocity, 0);
-            Player.ChangeState(Player.StateAir);
+            Player.ChangeState(Player.StateJump);
+            return;
         }
-        
-        // --- NEW: DASH TRIGGER ---
+
+        // Dash input
         if (Input.IsActionJustPressed("dash"))
         {
             Player.ChangeState(Player.StateDash);
             return;
         }
 
-        // Check for Movement Input (WASD)
+        // Movement input -> transition to walking
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         if (inputDir != Vector2.Zero)
         {
@@ -41,6 +48,6 @@ public partial class IdleState : BaseState
         }
     }
 
-    public override void Update(double delta) {}
-    public override void Exit() {}
+    public override void Update(double delta) { }
+    public override void Exit() { }
 }

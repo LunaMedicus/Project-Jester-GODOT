@@ -1,42 +1,69 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Projectile thrown by the player during attacks.
+/// Uses RigidBody3D for physics-based flight.
+/// Auto-destroys after 5 seconds or on collision.
+/// </summary>
 public partial class CardProjectile : RigidBody3D
 {
+	/// <summary>Damage dealt to enemies on hit.</summary>
 	[Export] public float Damage = 10.0f;
-	[Export] public float LaunchSpeed = 40.0f; // Faster speed so it flies straight
+	
+	/// <summary>Initial launch velocity magnitude.</summary>
+	[Export] public float LaunchSpeed = 40.0f;
 
+	/// <summary>
+	/// Called when the card spawns into the scene.
+	/// Sets up auto-destroy timer and collision handling.
+	/// </summary>
 	public override void _Ready()
 	{
-		// 1. Detach from parent so it flies freely (doesn't stick to player)
+		// === 1. Detach from Parent ===
+		// TopLevel = true makes this node independent from parent transforms
+		// Ensures card doesn't stick to or follow the player
 		TopLevel = true;
 		
-		// 2. Delete card after 5 seconds to clean up memory
+		// === 2. Auto-Destroy Timer ===
+		// Delete card after 5 seconds to prevent memory leaks
+		// and clean up missed projectiles
 		GetTree().CreateTimer(5.0f).Timeout += QueueFree;
 		
-		// 3. Connect the Hitbox signal
-		// IMPORTANT: Ensure your child node is named "Hitbox"
+		// === 3. Connect Hitbox Signal ===
+		// The Hitbox is an Area3D child that detects collisions
+		// This allows us to handle hits without stopping the card's physics
 		GetNode<Area3D>("Hitbox").BodyEntered += OnHit;
 	}
 
+	/// <summary>
+	/// Called when the card's hitbox collides with another body.
+	/// Handles damage dealing and projectile cleanup.
+	/// </summary>
+	/// <param name="body">The body that was hit.</param>
 	private void OnHit(Node3D body)
 	{
-		// 1. Ignore hitting itself
+		// === 1. Ignore Self ===
+		// Prevent the hitbox from detecting the card itself
 		if (body == this) return; 
 
-		// 2. Ignore hitting the Player (using the Group check is safest)
+		// === 2. Ignore Player ===
+		// Don't damage the player who threw the card
+		// Uses group check for flexibility
 		if (body.IsInGroup("Player")) return; 
 
 		GD.Print("Card hit: " + body.Name);
 		
-		// 3. CHECK FOR ENEMY
-		// We check if the body we hit has the "FloatingMask" script attached
+		// === 3. Enemy Damage Check ===
+		// If we hit an enemy with the FloatingMask script, deal damage
+		// This uses C# pattern matching ("is" keyword)
 		if (body is FloatingMask enemy)
 		{
 			enemy.TakeDamage(Damage);
 		}
 		
-		// 4. Destroy the card
+		// === 4. Destroy Card ===
+		// Card is destroyed on any collision (even non-enemies)
 		QueueFree();
 	}
 }
