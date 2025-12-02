@@ -26,8 +26,8 @@ public partial class DashState : BaseState
         }
         else
         {
-            // Dash Forward relative to Visuals
-            dashDir = -Player.Visuals.GlobalTransform.Basis.Z;
+            // Dash Forward relative to Camera
+            dashDir = camForward;
         }
 
         Player.Velocity = new Vector3(dashDir.X * Player.DashSpeed, 0, dashDir.Z * Player.DashSpeed);
