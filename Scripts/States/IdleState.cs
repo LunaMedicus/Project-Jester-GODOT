@@ -40,6 +40,13 @@ public partial class IdleState : BaseState
             return;
         }
 
+        // Attack input
+        if (Input.IsActionJustPressed("attack"))
+        {
+            Player.ChangeState(Player.StateAttack);
+            return;
+        }
+
         // Movement input -> transition to walking
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         if (inputDir != Vector2.Zero)

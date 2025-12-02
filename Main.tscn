@@ -75,7 +75,8 @@ shadow_enabled = true
 [node name="Player" parent="." instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6989336, 1.5379684, 1.1073625)
 JumpVelocity = 10.0
-AirSpeedMultiplier = 0.6
+MaxSpeed = 35.0
+AirSpeedMultiplier = 0.5
 WallRunGravity = 5.0
 WallJumpForce = 2.0
 WallRunSpeed = 20.0
