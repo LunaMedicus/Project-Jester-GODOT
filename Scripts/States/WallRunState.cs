@@ -1,84 +1,101 @@
 using Godot;
+using System;
 
-/// <summary>
-/// State for wall running.
-/// Player can run along walls, jump off, or dive away.
-/// Includes camera tilt for immersion.
-/// </summary>
 public partial class WallRunState : BaseState
 {
+    private float _directionMultiplier; // 1 = Forward along wall, -1 = Backward along wall
+
     public override void Enter()
     {
         GD.Print("Entered WallRun");
-        // Small upward velocity to stick to wall initially
         Player.Velocity = new Vector3(Player.Velocity.X, 0.5f, Player.Velocity.Z);
+
+        // --- DIRECTION LOCKING LOGIC ---
+        // 1. Calculate the natural "Tangent" of the wall (Horizontal line along the wall)
+        // We use Cross Product of WallNormal and Up to find the perpendicular line.
+        Vector3 wallTangent = Player.WallNormal.Cross(Vector3.Up).Normalized();
+
+        // 2. Compare with Camera direction
+        Vector3 camForward = -Player.CameraRig.GameplayCamera.GlobalTransform.Basis.Z;
+        
+        // Dot Product check: Are we looking somewhat in the same direction as the Tangent?
+        if (wallTangent.Dot(camForward) > 0)
+        {
+            _directionMultiplier = 1.0f; // Run "Right" relative to wall
+        }
+        else
+        {
+            _directionMultiplier = -1.0f; // Run "Left" relative to wall
+        }
+        // Now _directionMultiplier is LOCKED until we leave the wall.
     }
 
     public override void PhysicsUpdate(double delta)
     {
-        // === Wall Jump ===
-        // Jump away from wall at an angle
+        // 1. Jump Logic
         if (Input.IsActionJustPressed("ui_accept"))
         {
-            // Combine wall push (horizontal) with upward velocity
             Vector3 jumpDir = (Player.WallNormal * Player.WallJumpForce) + (Vector3.Up * Player.JumpVelocity);
             Player.Velocity = jumpDir;
             Player.ChangeState(Player.StateAir);
             return;
         }
-
-        // === Wall Dive ===
-        // Launch away from wall into a dive
+        
+        // 2. Dive
         if (Input.IsActionJustPressed("dash"))
         {
-            // Push away from wall before diving
             Player.Velocity += Player.WallNormal * 5.0f;
             Player.ChangeState(Player.StateDive);
             return;
         }
-
-        // Attack while wall running
+        
+        // 3. Attack
         if (Input.IsActionJustPressed("attack")) { Player.ChangeState(Player.StateAttack); return; }
 
-        // === Camera Tilt ===
-        // Tilt camera based on which wall we're on for visual feedback
+        // 4. Camera Tilt
         RayCast3D rightRay = Player.GetNode<RayCast3D>("WallChecks/RightWall");
         RayCast3D leftRay = Player.GetNode<RayCast3D>("WallChecks/LeftWall");
 
         if (rightRay.IsColliding())
-            Player.CameraRig.TargetTilt = Mathf.DegToRad(Player.CameraRig.TiltSpeed);   // Tilt right
+            Player.CameraRig.TargetTilt = Mathf.DegToRad(Player.CameraRig.TiltSpeed);   
         else if (leftRay.IsColliding())
-            Player.CameraRig.TargetTilt = Mathf.DegToRad(-Player.CameraRig.TiltSpeed);  // Tilt left
+            Player.CameraRig.TargetTilt = Mathf.DegToRad(-Player.CameraRig.TiltSpeed);  
 
-        // === Wall Run Movement ===
+        // 5. Movement & Gravity
         Vector3 velocity = Player.Velocity;
-        
-        // Reduced gravity while wall running (slide down slowly)
         velocity.Y -= Player.WallRunGravity * (float)delta;
 
-        // Get movement direction from input
-        Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        Vector3 forwardDir = GetCameraRelativeDirection(inputDir);
-
-        if (forwardDir != Vector3.Zero)
+        // --- LOCKED MOVEMENT LOGIC ---
+        
+        // Only allow movement if holding "Forward" (W)
+        if (Input.IsActionPressed("ui_up"))
         {
-            // Project direction onto wall (slide along wall surface)
-            forwardDir = forwardDir.Slide(Player.WallNormal).Normalized();
-            velocity.X = forwardDir.X * Player.WallRunSpeed;
-            velocity.Z = forwardDir.Z * Player.WallRunSpeed;
-            RotateVisuals(forwardDir, delta);
+            // Calculate the path along the wall using our LOCKED multiplier
+            // We recalculate the Cross Product every frame so we can run around CURVED walls
+            Vector3 currentTangent = Player.WallNormal.Cross(Vector3.Up).Normalized() * _directionMultiplier;
+
+            velocity.X = currentTangent.X * Player.WallRunSpeed;
+            velocity.Z = currentTangent.Z * Player.WallRunSpeed;
+
+            // Rotate Visuals to face the direction we are running
+            if (Player.Visuals != null)
+            {
+                float targetAngle = Mathf.Atan2(currentTangent.X, currentTangent.Z);
+                Vector3 rotation = Player.Visuals.Rotation;
+                rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
+                Player.Visuals.Rotation = rotation;
+            }
         }
         else
         {
-            // No input - stop horizontal movement
-            velocity.X = 0;
-            velocity.Z = 0;
+            // If we stop holding W, we just slide down (friction)
+            velocity.X = Mathf.MoveToward(velocity.X, 0, 10.0f * (float)delta);
+            velocity.Z = Mathf.MoveToward(velocity.Z, 0, 10.0f * (float)delta);
         }
 
         Player.Velocity = velocity;
 
-        // === Exit Conditions ===
-        // Leave wall run if we're no longer touching wall or hit ground
+        // 6. Exit Check
         bool isTouchingWall = rightRay.IsColliding() || leftRay.IsColliding();
         if (!isTouchingWall || Player.IsOnFloor())
         {
@@ -86,11 +103,10 @@ public partial class WallRunState : BaseState
         }
     }
 
-    public override void Update(double delta) { }
-
-    public override void Exit()
+    public override void Update(double delta) {}
+    
+    public override void Exit() 
     {
-        // Reset camera tilt when leaving wall run
         Player.CameraRig.TargetTilt = 0f;
     }
 }
