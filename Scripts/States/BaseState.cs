@@ -59,9 +59,9 @@ public abstract partial class BaseState : Node
 	protected void ApplyAirMovement(Vector3 direction)
 	{
 	   Player.Velocity = new Vector3(
-		  direction.X * Player.RunSpeed * Player.AirSpeedMultiplier,
-		  Player.Velocity.Y,
-		  direction.Z * Player.RunSpeed * Player.AirSpeedMultiplier
+		 direction.X * Player.RunSpeed * Player.AirSpeedMultiplier,
+		 Player.Velocity.Y,
+		 direction.Z * Player.RunSpeed * Player.AirSpeedMultiplier
 	   );
 	}
 
@@ -74,19 +74,27 @@ public abstract partial class BaseState : Node
 
 	   if (horizontalVel.Length() > Player.MaxSpeed)
 	   {
-		  horizontalVel = horizontalVel.Normalized() * Player.MaxSpeed;
-		  Player.Velocity = new Vector3(horizontalVel.X, Player.Velocity.Y, horizontalVel.Z);
+		 horizontalVel = horizontalVel.Normalized() * Player.MaxSpeed;
+		 Player.Velocity = new Vector3(horizontalVel.X, Player.Velocity.Y, horizontalVel.Z);
 	   }
 	}
 
 	/// <summary>
-	/// Smoothly rotates the player's visual mesh.
+	/// Smoothly rotates the player's visual mesh to face the INPUT direction (World Absolute).
+    /// Uses raw input (Stick/WASD) so rotation is independent of Camera Angle.
+    /// Stick UP = Face North (-Z). Stick RIGHT = Face East (+X).
     /// </summary>
-    protected void RotateVisuals(Vector3 direction, double delta)
+    /// <param name="inputDir">Raw 2D input vector.</param>
+    /// <param name="delta">Frame delta time for smooth interpolation.</param>
+    protected void RotateVisuals(Vector2 inputDir, double delta)
     {
-        if (Player.Visuals != null)
+        if (Player.Visuals != null && inputDir != Vector2.Zero)
         {
-            float targetAngle = Mathf.Atan2(direction.X, direction.Z);
+            // Convert Input (X, Y) directly to Angle.
+            // Atan2 calculates the angle of the stick vector.
+            float targetAngle = Mathf.Atan2(inputDir.X, inputDir.Y);
+
+            // Smoothly interpolate current rotation to target
             Vector3 rotation = Player.Visuals.Rotation;
             rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
             Player.Visuals.Rotation = rotation;

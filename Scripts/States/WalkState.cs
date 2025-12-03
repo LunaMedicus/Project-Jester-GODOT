@@ -27,8 +27,10 @@ public partial class WalkState : BaseState
         if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDash); return; }
         
         // === Movement Processing ===
-        // Get raw input and convert to camera-relative direction
+        // Get raw input
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        
+        // Convert to camera-relative direction (For Movement Velocity)
         Vector3 direction = GetCameraRelativeDirection(inputDir);
 
         if (direction != Vector3.Zero)
@@ -47,8 +49,9 @@ public partial class WalkState : BaseState
             // Prevent exceeding max speed
             ClampHorizontalSpeed();
 
-            // Rotate character to face movement direction
-            RotateVisuals(direction, delta);
+            // Rotate character to face STICK direction (World Absolute)
+            // We pass 'inputDir' directly, ignoring the camera angle for rotation.
+            RotateVisuals(inputDir, delta);
         }
         else
         {

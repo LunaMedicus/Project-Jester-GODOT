@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cxabkxvncgeip"]
+[gd_scene load_steps=10 format=3 uid="uid://cxabkxvncgeip"]
 
 [ext_resource type="PackedScene" uid="uid://c76u62xtc5gea" path="res://player.tscn" id="1_glv2v"]
 [ext_resource type="PackedScene" uid="uid://c6a3slprnkswj" path="res://FloatingMask.tscn" id="2_uu6xs"]
@@ -11,6 +11,18 @@ size = Vector3(20, 1, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glv2v"]
 albedo_color = Color(0.48235294, 0.7019608, 0.4117647, 1)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_uu6xs"]
+height = 9.997437
+radius = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_r0du0"]
+top_radius = 0.3
+bottom_radius = 0.3
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r0du0"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_cm0pq"]
 
 [node name="World" type="Node3D"]
 
@@ -92,3 +104,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.192696, 1.8265381, -61.972
 
 [node name="FloatingMask2" parent="." instance=ExtResource("2_uu6xs")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9567623, 2.8967853, -55.912144)
+
+[node name="Pole" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4765396, -6.077014)
+collision_layer = 9
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pole"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+shape = SubResource("CylinderShape3D_uu6xs")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pole"]
+transform = Transform3D(1, 0, 0, 0, 5, 0, 0, 0, 1, 0, 4.0113626, 0)
+mesh = SubResource("CylinderMesh_r0du0")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.004589, 3, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_r0du0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = SubResource("BoxMesh_cm0pq")

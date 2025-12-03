@@ -8,50 +8,77 @@ public partial class AirState : BaseState
 {
 	public override void Enter()
 	{
-		GD.Print("Entered Air (Falling)");
-		// Velocity is preserved from previous state (momentum)
+	   GD.Print("Entered Air (Falling)");
+	   // Velocity is preserved from previous state (momentum)
 	}
 
 	public override void PhysicsUpdate(double delta)
 	{
-		// === State Transition Checks ===
+	   // === State Transition Checks ===
 
-		// Dash in air -> Dive attack
-		if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
-		
+	   // Dash in air -> Dive attack
+	   if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
+	   
+	   // === NEW: Pole Climbing Logic ===
+	   // Check if we hit a pole while holding forward
+	   // Note: Ensure you created the "PoleCheck" node in the player scene!
+	   if (Player.HasNode("PoleCheck"))
+	   {
+		  ShapeCast3D poleCheck = Player.GetNode<ShapeCast3D>("PoleCheck");
+		  if (poleCheck.IsColliding())
+		  {
+			 if (Input.IsActionPressed("ui_up"))
+			 {
+				Player.ChangeMoveState(Player.StatePoleClimb);
+				return;
+			 }
+		  }
+	   }
 
-		// === Apply Gravity ===
-		// Pull player downward each frame
-		Vector3 velocity = Player.Velocity;
-		velocity.Y -= Player.Gravity * (float)delta;
-		Player.Velocity = velocity;
+	   // === NEW: Ledge Grab Logic ===
+	   // Check for ledge if falling
+	   if (Player.HasNode("LedgeChecks/LedgeWallRay") && Player.HasNode("LedgeChecks/LedgeTopRay"))
+	   {
+		  RayCast3D wallRay = Player.GetNode<RayCast3D>("LedgeChecks/LedgeWallRay");
+		  RayCast3D topRay = Player.GetNode<RayCast3D>("LedgeChecks/LedgeTopRay");
 
-		// === Air Control ===
-		// Allow player to influence direction while falling (reduced control)
-		Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-		Vector3 direction = GetCameraRelativeDirection(inputDir);
+		  if (wallRay.IsColliding() && !topRay.IsColliding())
+		  {
+			 // Only grab if falling down
+			 if (Player.Velocity.Y < 0)
+			 {
+				Player.ChangeMoveState(Player.StateLedgeGrab);
+				return;
+			 }
+		  }
+	   }
 
-		if (direction != Vector3.Zero)
-		{
-			// Rotate to face movement direction
-			RotateVisuals(direction, delta);
+	   // === Apply Gravity ===
+	   Vector3 velocity = Player.Velocity;
+	   velocity.Y -= Player.Gravity * (float)delta;
+	   Player.Velocity = velocity;
 
-			// Apply air movement (reduced speed based on AirSpeedMultiplier)
-			ApplyAirMovement(direction);
-		}
+	   // === Air Control ===
+	   Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+	   Vector3 direction = GetCameraRelativeDirection(inputDir);
 
-		// Prevent exceeding max speed
-		ClampHorizontalSpeed();
+	   if (direction != Vector3.Zero)
+	   {
+		 // Rotate character to face STICK direction (World Absolute)
+		 RotateVisuals(inputDir, delta);
+		 ApplyAirMovement(direction);
+	   }
 
-		// === Landing Check ===
-		// When we hit the ground, transition based on input
-		if (Player.IsOnFloor())
-		{
-			if (inputDir == Vector2.Zero)
-				Player.ChangeMoveState(Player.StateIdle);   // No input -> Idle
-			else
-				Player.ChangeMoveState(Player.StateWalk);   // Has input -> Walk
-		}
+	   ClampHorizontalSpeed();
+
+	   // === Landing Check ===
+	   if (Player.IsOnFloor())
+	   {
+		 if (inputDir == Vector2.Zero)
+		   Player.ChangeMoveState(Player.StateIdle);   // No input -> Idle
+		 else
+		   Player.ChangeMoveState(Player.StateWalk);   // Has input -> Walk
+	   }
 	}
 
 	public override void Update(double delta) { }

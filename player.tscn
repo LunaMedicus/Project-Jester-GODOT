@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene load_steps=21 format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
@@ -11,8 +11,10 @@
 [ext_resource type="Script" uid="uid://dn83ltp68v6ue" path="res://Scripts/States/DiveState.cs" id="7_b26j0"]
 [ext_resource type="Script" uid="uid://dhh461tahccl3" path="res://Scripts/States/DiveRollState.cs" id="8_n7ghd"]
 [ext_resource type="Script" uid="uid://ccq368jymee7r" path="res://Scripts/States/AttackState.cs" id="10_n7ghd"]
+[ext_resource type="Script" uid="uid://evsr14apjxve" path="res://Scripts/States/PoleClimbState.cs" id="12_606se"]
 [ext_resource type="Script" uid="uid://bgo3vshoyb50l" path="res://Scripts/States/JumpState.cs" id="12_ivps1"]
 [ext_resource type="Script" uid="uid://dd1ejxnoh6vv3" path="res://Scripts/States/ActionIdleState.cs" id="12_urp6f"]
+[ext_resource type="Script" uid="uid://c4rgc5472chur" path="res://Scripts/States/LedgeGrabState.cs" id="13_u1c27"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 
@@ -22,6 +24,8 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
 albedo_color = Color(0.827451, 0, 0, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_op7ga"]
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Visuals", "CameraRig", "RightHandPos", "LeftHandPos") groups=["Player"]]
 collision_layer = 2
@@ -89,6 +93,12 @@ script = ExtResource("8_n7ghd")
 [node name="Jump" type="Node" parent="MoveFSM"]
 script = ExtResource("12_ivps1")
 
+[node name="PoleClimb" type="Node" parent="MoveFSM"]
+script = ExtResource("12_606se")
+
+[node name="LedgeGrab" type="Node" parent="MoveFSM"]
+script = ExtResource("13_u1c27")
+
 [node name="ActionFSM" type="Node" parent="."]
 
 [node name="ActionIdle" type="Node" parent="ActionFSM"]
@@ -104,3 +114,18 @@ target_position = Vector3(0.8, 0, 0)
 
 [node name="LeftWall" type="RayCast3D" parent="WallChecks"]
 target_position = Vector3(-0.8, 0, 0)
+
+[node name="PoleCheck" type="ShapeCast3D" parent="."]
+shape = SubResource("SphereShape3D_op7ga")
+target_position = Vector3(0, 0, -1)
+collision_mask = 8
+
+[node name="LedgeChecks" type="Node3D" parent="."]
+
+[node name="LedgeWallRay" type="RayCast3D" parent="LedgeChecks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+debug_shape_thickness = 5
+
+[node name="LedgeTopRay" type="RayCast3D" parent="LedgeChecks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -1)
+debug_shape_thickness = 5

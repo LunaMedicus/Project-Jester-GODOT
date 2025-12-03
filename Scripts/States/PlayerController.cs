@@ -118,24 +118,49 @@ public partial class PlayerController : CharacterBody3D
 	#endregion
 
 	#region State Machine
+	// === Dual State Machine ===
 	/// <summary>The currently active movement state (Legs).</summary>
 	private BaseState _currentMoveState;
 	
 	/// <summary>The currently active action state (Arms).</summary>
 	private BaseState _currentActionState;
 	
-	// === State References ===
+	// -- Move States --
+	/// <summary>Standing still on ground.</summary>
 	public BaseState StateIdle;
+	
+	/// <summary>Walking/running on ground.</summary>
 	public BaseState StateWalk;
+	
+	/// <summary>Falling through the air.</summary>
 	public BaseState StateAir;
+	
+	/// <summary>Ascending from a jump.</summary>
 	public BaseState StateJump;
+	
+	/// <summary>Running along walls.</summary>
 	public BaseState StateWallRun;
+	
+	/// <summary>Quick horizontal dash.</summary>
 	public BaseState StateDash;
+	
+	/// <summary>Aerial dive attack.</summary>
 	public BaseState StateDive;
+	
+	/// <summary>Ground roll (after dive or slide hop).</summary>
 	public BaseState StateDiveRoll;
 	
-	// Action States
+	/// <summary>
+	public BaseState StatePoleClimb;
+	
+	/// <summary>
+	public BaseState StateLedgeGrab;
+	
+	// -- Action States --
+	/// <summary>Hands doing nothing (Ready to throw).</summary>
 	public BaseState StateActionIdle;
+	
+	/// <summary>Throwing a card (Animation/Logic).</summary>
 	public BaseState StateAttack;
 
 	/// <summary>Normal vector of the wall being touched.</summary>
@@ -144,11 +169,11 @@ public partial class PlayerController : CharacterBody3D
 
 	/// <summary>
 	/// Called when the node enters the scene tree.
-	/// Initializes all states and starts machines.
+	/// Initializes both state machines and finds nodes.
 	/// </summary>
 	public override void _Ready()
 	{
-	   // === Get State References ===
+	   // 1. Get Movement Nodes (From MoveFSM container)
 	   StateIdle = GetNode<BaseState>("MoveFSM/Idle");
 	   StateWalk = GetNode<BaseState>("MoveFSM/Walk");
 	   StateAir = GetNode<BaseState>("MoveFSM/Air");
@@ -157,11 +182,14 @@ public partial class PlayerController : CharacterBody3D
 	   StateDash = GetNode<BaseState>("MoveFSM/Dash");
 	   StateDive = GetNode<BaseState>("MoveFSM/Dive");
 	   StateDiveRoll = GetNode<BaseState>("MoveFSM/DiveRoll");
+	   StatePoleClimb = GetNode<BaseState>("MoveFSM/PoleClimb");
+	   StateLedgeGrab = GetNode<BaseState>("MoveFSM/LedgeGrab");
 	   
+	   // 2. Get Action Nodes (From ActionFSM container)
 	   StateActionIdle = GetNode<BaseState>("ActionFSM/ActionIdle");
 	   StateAttack = GetNode<BaseState>("ActionFSM/Attack");
 
-	   // === Initialize States ===
+	   // 3. Initialize All States
 	   StateIdle.Init(this);
 	   StateWalk.Init(this);
 	   StateAir.Init(this);
@@ -170,10 +198,13 @@ public partial class PlayerController : CharacterBody3D
 	   StateDash.Init(this);
 	   StateDive.Init(this);
 	   StateDiveRoll.Init(this);
+	   StatePoleClimb.Init(this);
+	   StateLedgeGrab.Init(this);
 	   StateActionIdle.Init(this);
 	   StateAttack.Init(this);
-
-	   // Start State Machines
+	   
+	   
+	   // 4. Start BOTH Machines
 	   ChangeMoveState(StateIdle);
 	   ChangeActionState(StateActionIdle);
 	   
@@ -182,7 +213,7 @@ public partial class PlayerController : CharacterBody3D
 	
 	public override void _UnhandledInput(InputEvent @event)
 	{
-	   // Handled by CameraRig.cs
+	   // Camera rotation is handled by CameraRig.cs
 	}
 	
 	/// <summary>
@@ -211,7 +242,7 @@ public partial class PlayerController : CharacterBody3D
 	   }
 	}
 
-	/// <summary>Transitions the Movement State (Legs).</summary>
+	/// <summary>Change the MOVEMENT state (Legs/Body).</summary>
 	public void ChangeMoveState(BaseState newState)
 	{
 	   if (_currentMoveState != null) _currentMoveState.Exit();
@@ -219,7 +250,7 @@ public partial class PlayerController : CharacterBody3D
 	   _currentMoveState.Enter();
 	}
 
-	/// <summary>Transitions the Action State (Arms).</summary>
+	/// <summary>Change the ACTION state (Arms/Equipment).</summary>
 	public void ChangeActionState(BaseState newState)
 	{
 	   if (_currentActionState != null) _currentActionState.Exit();
