@@ -17,9 +17,10 @@ public partial class IdleState : BaseState
     public override void PhysicsUpdate(double delta)
     {
         // === Ground Check ===
-        // If we walked off an edge, start falling
+        // If we walked off an edge, start falling (enable coyote time since we walked off, not jumped)
         if (!Player.IsOnFloor())
         {
+            Player.CanUseCoyoteTime = true;
             Player.ChangeMoveState(Player.StateAir);
             return;
         }

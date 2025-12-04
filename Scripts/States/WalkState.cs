@@ -17,19 +17,24 @@ public partial class WalkState : BaseState
         // === State Transition Checks ===
         // Check these first before processing movement
 
-        // Fell off edge -> Air state
-        if (!Player.IsOnFloor()) { Player.ChangeMoveState(Player.StateAir); return; }
+        // Fell off edge -> Air state (enable coyote time since we walked off, not jumped)
+        if (!Player.IsOnFloor())
+        {
+            Player.CanUseCoyoteTime = true;
+            Player.ChangeMoveState(Player.StateAir);
+            return;
+        }
 
         // Jump input -> Jump state
         if (Input.IsActionJustPressed("ui_accept")) { Player.ChangeMoveState(Player.StateJump); return; }
 
         // Dash input -> Dash state
         if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDash); return; }
-        
+
         // === Movement Processing ===
         // Get raw input
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        
+
         // Convert to camera-relative direction (For Movement Velocity)
         Vector3 direction = GetCameraRelativeDirection(inputDir);
 

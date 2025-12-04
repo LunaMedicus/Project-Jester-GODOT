@@ -3,6 +3,7 @@ using Godot;
 /// <summary>
 /// State for when the player is falling (not ascending from a jump).
 /// Allows limited air control and can transition to dive.
+/// Supports coyote time - a brief grace period to jump after leaving a ledge.
 /// </summary>
 public partial class AirState : BaseState
 {
@@ -10,15 +11,29 @@ public partial class AirState : BaseState
 	{
 	   GD.Print("Entered Air (Falling)");
 	   // Velocity is preserved from previous state (momentum)
+
+	   // Reset coyote time timer when entering air state
+	   Player.TimeSinceGrounded = 0f;
 	}
 
 	public override void PhysicsUpdate(double delta)
 	{
+	   // === Update Coyote Time Timer ===
+	   Player.TimeSinceGrounded += (float)delta;
+
 	   // === State Transition Checks ===
+
+	   // Coyote Time Jump - Allow jumping shortly after leaving ground
+	   if (Input.IsActionJustPressed("ui_accept") && Player.CanUseCoyoteTime && Player.TimeSinceGrounded <= Player.CoyoteTime)
+	   {
+		  Player.CanUseCoyoteTime = false; // Consume coyote time
+		  Player.ChangeMoveState(Player.StateJump);
+		  return;
+	   }
 
 	   // Dash in air -> Dive attack
 	   if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
-	   
+
 	   // === NEW: Pole Climbing Logic ===
 	   // Check if we hit a pole while holding forward
 	   // Note: Ensure you created the "PoleCheck" node in the player scene!

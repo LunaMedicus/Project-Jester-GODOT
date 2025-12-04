@@ -96,7 +96,7 @@ WallJumpInputInfluence = 3.0
 DiveVerticalSpeed = 5.0
 DiveForwardSpeed = 20.0
 DiveRollSpeed = 10.0
-DiveRollDuration = 0.4
+DiveRollDuration = 0.2
 RollControlStrength = 100.0
 
 [node name="FloatingMask" parent="." instance=ExtResource("2_uu6xs")]

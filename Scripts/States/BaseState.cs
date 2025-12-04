@@ -22,7 +22,7 @@ public abstract partial class BaseState : Node
 	}
 
 	// --- ABSTRACT METHODS (Must be implemented by child classes) ---
-	
+
 	/// <summary>Called when entering this state.</summary>
 	public abstract void Enter();
 
@@ -80,9 +80,8 @@ public abstract partial class BaseState : Node
 	}
 
 	/// <summary>
-	/// Smoothly rotates the player's visual mesh to face the INPUT direction (World Absolute).
-    /// Uses raw input (Stick/WASD) so rotation is independent of Camera Angle.
-    /// Stick UP = Face North (-Z). Stick RIGHT = Face East (+X).
+	/// Smoothly rotates the player's visual mesh to face the camera-relative movement direction.
+    /// Player faces the direction they're moving relative to where the camera is looking.
     /// </summary>
     /// <param name="inputDir">Raw 2D input vector.</param>
     /// <param name="delta">Frame delta time for smooth interpolation.</param>
@@ -90,9 +89,11 @@ public abstract partial class BaseState : Node
     {
         if (Player.Visuals != null && inputDir != Vector2.Zero)
         {
-            // Convert Input (X, Y) directly to Angle.
-            // Atan2 calculates the angle of the stick vector.
-            float targetAngle = Mathf.Atan2(inputDir.X, inputDir.Y);
+            // Get the camera-relative movement direction
+            Vector3 direction = GetCameraRelativeDirection(inputDir);
+
+            // Calculate target angle from the camera-relative direction
+            float targetAngle = Mathf.Atan2(direction.X, direction.Z);
 
             // Smoothly interpolate current rotation to target
             Vector3 rotation = Player.Visuals.Rotation;
