@@ -84,6 +84,16 @@ public partial class AirState : BaseState
 		 ApplyAirMovement(direction);
 	   }
 
+	   // Rotate the entire player to face the movement direction in air
+       if (inputDir != Vector2.Zero)
+       {
+           Vector3 moveDir = GetCameraRelativeDirection(inputDir);
+           float targetAngle = Mathf.Atan2(moveDir.X, moveDir.Z);
+           Vector3 playerRotation = Player.Rotation;
+           playerRotation.Y = Mathf.LerpAngle(playerRotation.Y, targetAngle, 10.0f * (float)delta);
+           Player.Rotation = playerRotation;
+       }
+
 	   ClampHorizontalSpeed();
 
 	   // === Landing Check ===
