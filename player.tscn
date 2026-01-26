@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c76u62xtc5gea"]
+[gd_scene format=3 uid="uid://c76u62xtc5gea"]
 
 [ext_resource type="Script" uid="uid://db3qmt07i5gwr" path="res://Scripts/States/PlayerController.cs" id="1_hqtel"]
 [ext_resource type="PackedScene" uid="uid://nqfavaoa2w77" path="res://Card.tscn" id="2_b26j0"]
@@ -15,34 +15,29 @@
 [ext_resource type="Script" uid="uid://bgo3vshoyb50l" path="res://Scripts/States/JumpState.cs" id="12_ivps1"]
 [ext_resource type="Script" uid="uid://dd1ejxnoh6vv3" path="res://Scripts/States/ActionIdleState.cs" id="12_urp6f"]
 [ext_resource type="Script" uid="uid://c4rgc5472chur" path="res://Scripts/States/LedgeGrabState.cs" id="13_u1c27"]
+[ext_resource type="PackedScene" uid="uid://bqa3sw7thn5qu" path="res://ual_2_standard.tscn" id="16_u1c27"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_nvl01"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqtel"]
-albedo_color = Color(0.827451, 0, 0, 1)
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_op7ga"]
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Visuals", "CameraRig", "RightHandPos", "LeftHandPos") groups=["Player"]]
+[node name="Player" type="CharacterBody3D" unique_id=524560835 node_paths=PackedStringArray("CameraRig", "RightHandPos", "LeftHandPos") groups=["Player"]]
 collision_layer = 2
 script = ExtResource("1_hqtel")
 DiveRollSpeed = 30.0
 DiveRollDuration = 0.3
-Visuals = NodePath("MeshInstance3D")
 CameraRig = NodePath("CamOrigin")
 CardScene = ExtResource("2_b26j0")
 RightHandPos = NodePath("CamOrigin/SpringArm3D/Camera3D/RightHandPos")
 LeftHandPos = NodePath("CamOrigin/SpringArm3D/Camera3D/LeftHandPos")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1872130832]
 shape = SubResource("CapsuleShape3D_sh265")
 debug_color = Color(0.34271184, 0.62123054, 0, 0.41960785)
 
-[node name="CamOrigin" type="Node3D" parent="." node_paths=PackedStringArray("PlayerTarget", "SpringArm", "GameplayCamera")]
+[node name="CamOrigin" type="Node3D" parent="." unique_id=183675440 node_paths=PackedStringArray("PlayerTarget", "SpringArm", "GameplayCamera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 top_level = true
 script = ExtResource("3_nvl01")
@@ -50,83 +45,82 @@ PlayerTarget = NodePath("..")
 SpringArm = NodePath("SpringArm3D")
 GameplayCamera = NodePath("SpringArm3D/Camera3D")
 
-[node name="SpringArm3D" type="SpringArm3D" parent="CamOrigin"]
+[node name="SpringArm3D" type="SpringArm3D" parent="CamOrigin" unique_id=1661103831]
 shape = SubResource("SphereShape3D_nvl01")
 spring_length = 3.0
 margin = 0.5
 
-[node name="Camera3D" type="Camera3D" parent="CamOrigin/SpringArm3D"]
+[node name="Camera3D" type="Camera3D" parent="CamOrigin/SpringArm3D" unique_id=976638460]
 
-[node name="RightHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D"]
+[node name="RightHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D" unique_id=1203820844]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85558885, -0.59990895, -2.9566665)
 
-[node name="LeftHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D"]
+[node name="LeftHandPos" type="Node3D" parent="CamOrigin/SpringArm3D/Camera3D" unique_id=1368389527]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99592006, -0.59990895, -2.9566665)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("CapsuleMesh_4flbx")
-surface_material_override/0 = SubResource("StandardMaterial3D_hqtel")
+[node name="MoveFSM" type="Node" parent="." unique_id=649002314]
 
-[node name="MoveFSM" type="Node" parent="."]
-
-[node name="Idle" type="Node" parent="MoveFSM"]
+[node name="Idle" type="Node" parent="MoveFSM" unique_id=55584917]
 script = ExtResource("2_sweqy")
 
-[node name="Walk" type="Node" parent="MoveFSM"]
+[node name="Walk" type="Node" parent="MoveFSM" unique_id=2085210738]
 script = ExtResource("3_2hs0m")
 
-[node name="Air" type="Node" parent="MoveFSM"]
+[node name="Air" type="Node" parent="MoveFSM" unique_id=1821611315]
 script = ExtResource("4_1jxqw")
 
-[node name="WallRun" type="Node" parent="MoveFSM"]
+[node name="WallRun" type="Node" parent="MoveFSM" unique_id=614896931]
 script = ExtResource("5_sweqy")
 
-[node name="Dash" type="Node" parent="MoveFSM"]
+[node name="Dash" type="Node" parent="MoveFSM" unique_id=552073346]
 script = ExtResource("6_dw050")
 
-[node name="Dive" type="Node" parent="MoveFSM"]
+[node name="Dive" type="Node" parent="MoveFSM" unique_id=985603068]
 script = ExtResource("7_b26j0")
 
-[node name="DiveRoll" type="Node" parent="MoveFSM"]
+[node name="DiveRoll" type="Node" parent="MoveFSM" unique_id=602754268]
 script = ExtResource("8_n7ghd")
 
-[node name="Jump" type="Node" parent="MoveFSM"]
+[node name="Jump" type="Node" parent="MoveFSM" unique_id=74951136]
 script = ExtResource("12_ivps1")
 
-[node name="PoleClimb" type="Node" parent="MoveFSM"]
+[node name="PoleClimb" type="Node" parent="MoveFSM" unique_id=294844505]
 script = ExtResource("12_606se")
 
-[node name="LedgeGrab" type="Node" parent="MoveFSM"]
+[node name="LedgeGrab" type="Node" parent="MoveFSM" unique_id=1975153128]
 script = ExtResource("13_u1c27")
 
-[node name="ActionFSM" type="Node" parent="."]
+[node name="ActionFSM" type="Node" parent="." unique_id=682686656]
 
-[node name="ActionIdle" type="Node" parent="ActionFSM"]
+[node name="ActionIdle" type="Node" parent="ActionFSM" unique_id=1850026672]
 script = ExtResource("12_urp6f")
 
-[node name="Attack" type="Node" parent="ActionFSM"]
+[node name="Attack" type="Node" parent="ActionFSM" unique_id=1747207951]
 script = ExtResource("10_n7ghd")
 
-[node name="WallChecks" type="Node3D" parent="."]
+[node name="WallChecks" type="Node3D" parent="." unique_id=30136146]
 
-[node name="RightWall" type="RayCast3D" parent="WallChecks"]
+[node name="RightWall" type="RayCast3D" parent="WallChecks" unique_id=839807284]
 target_position = Vector3(0.8, 0, 0)
 
-[node name="LeftWall" type="RayCast3D" parent="WallChecks"]
+[node name="LeftWall" type="RayCast3D" parent="WallChecks" unique_id=1813176019]
 target_position = Vector3(-0.8, 0, 0)
 
-[node name="PoleCheck" type="ShapeCast3D" parent="."]
+[node name="PoleCheck" type="ShapeCast3D" parent="." unique_id=1331340083]
 transform = Transform3D(1.6854006, 0, 0, 0, 2.342095, 0, 0, 0, 1.3284544, 0, 0, 1.3236511)
 shape = SubResource("SphereShape3D_op7ga")
 target_position = Vector3(0, 0, -1)
 collision_mask = 8
 
-[node name="LedgeChecks" type="Node3D" parent="."]
+[node name="LedgeChecks" type="Node3D" parent="." unique_id=432026312]
 
-[node name="LedgeWallRay" type="RayCast3D" parent="LedgeChecks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+[node name="LedgeWallRay" type="RayCast3D" parent="LedgeChecks" unique_id=712234256]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.5)
 debug_shape_thickness = 5
 
-[node name="LedgeTopRay" type="RayCast3D" parent="LedgeChecks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -1)
+[node name="LedgeTopRay" type="RayCast3D" parent="LedgeChecks" unique_id=1920621520]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.5)
 debug_shape_thickness = 5
+
+[node name="UAL2_Standard" parent="." unique_id=413883304 instance=ExtResource("16_u1c27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
