@@ -107,6 +107,10 @@ public partial class PlayerController : CharacterBody3D
 
     /// <summary>AnimationTree controlling player animations.</summary>
     [Export] public AnimationTree AnimationTree;
+
+    private const string LocomotionBlendPath = "parameters/WalkState/blend_position";
+    private Vector2 _locomotionBlend = Vector2.Zero;
+    [Export] public float LocomotionBlendSpeed = 8.0f;
     #endregion
 
     #region Combat
@@ -241,6 +245,8 @@ public partial class PlayerController : CharacterBody3D
         _currentMoveState.PhysicsUpdate(delta);
         _currentActionState.PhysicsUpdate(delta);
 
+        UpdateLocomotionBlend(delta);
+
         MoveAndSlide();
     }
 
@@ -264,29 +270,6 @@ public partial class PlayerController : CharacterBody3D
         if (_currentMoveState != null) _currentMoveState.Exit();
         _currentMoveState = newState;
         _currentMoveState.Enter();
-
-        // Play animation based on state name
-        if (AnimationTree != null)
-        {
-            // Example: Use state name to set AnimationTree parameters
-            // Assumes blendspace2d node is named "WalkState" in AnimationTree
-            string stateName = newState.GetType().Name;
-            switch (stateName)
-            {
-                case "WalkState":
-                    AnimationTree.Set("parameters/WalkState/blend_position", new Vector2(1, 0)); // Example: walking
-                    AnimationTree.Set("parameters/WalkState/active", true);
-                    break;
-                case "IdleState":
-                    AnimationTree.Set("parameters/WalkState/blend_position", new Vector2(0, 0)); // Example: idle
-                    AnimationTree.Set("parameters/WalkState/active", true);
-                    break;
-                // Add more cases for other states and animations as needed
-                default:
-                    AnimationTree.Set("parameters/WalkState/active", false);
-                    break;
-            }
-        }
     }
 
     /// <summary>Change the ACTION state (Arms/Equipment).</summary>
@@ -295,5 +278,32 @@ public partial class PlayerController : CharacterBody3D
         if (_currentActionState != null) _currentActionState.Exit();
         _currentActionState = newState;
         _currentActionState.Enter();
+    }
+
+    private void UpdateLocomotionBlend(double delta)
+    {
+        if (AnimationTree == null)
+            return;
+
+        Vector3 horizontalVelocity = Velocity;
+        horizontalVelocity.Y = 0f;
+
+        float speed = horizontalVelocity.Length();
+        Vector2 targetBlend = Vector2.Zero;
+
+        if (speed > 0.01f)
+        {
+            Vector3 localVelocity = GlobalTransform.Basis.Inverse() * horizontalVelocity;
+            Vector2 localDir = new Vector2(localVelocity.X, localVelocity.Z);
+            if (localDir.Length() > 0.001f)
+            {
+                float speedFactor = Mathf.Clamp(speed / Mathf.Max(RunSpeed, 0.01f), 0f, 1f);
+                targetBlend = localDir.Normalized() * speedFactor;
+            }
+        }
+
+        float move = (float)delta * LocomotionBlendSpeed;
+        _locomotionBlend = _locomotionBlend.MoveToward(targetBlend, move);
+        AnimationTree.Set(LocomotionBlendPath, _locomotionBlend);
     }
 }
