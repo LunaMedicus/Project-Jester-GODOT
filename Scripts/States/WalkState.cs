@@ -55,7 +55,7 @@ public partial class WalkState : BaseState
             ClampHorizontalSpeed();
 
             // Rotate character to face stick direction in camera space
-            RotateVisuals(inputDir, delta);
+            RotateCharacter(inputDir, delta);
         }
         else
         {

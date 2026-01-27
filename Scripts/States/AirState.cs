@@ -80,7 +80,7 @@ public partial class AirState : BaseState
 	   if (direction != Vector3.Zero)
 	   {
 		 // Rotate character to face stick direction in camera space
-		 RotateVisuals(inputDir, delta);
+		 RotateCharacter(inputDir, delta);
 		 ApplyAirMovement(direction);
 	   }
 

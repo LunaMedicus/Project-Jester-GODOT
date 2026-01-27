@@ -45,7 +45,7 @@ public partial class JumpState : BaseState
         if (direction != Vector3.Zero)
         {
             // Rotate to face stick direction in camera space
-            RotateVisuals(inputDir, delta);
+            RotateCharacter(inputDir, delta);
 
             // Apply air movement (reduced speed based on AirSpeedMultiplier)
             ApplyAirMovement(direction);

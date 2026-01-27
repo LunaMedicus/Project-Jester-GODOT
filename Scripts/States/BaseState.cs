@@ -79,26 +79,23 @@ public abstract partial class BaseState : Node
 	   }
 	}
 
-	/// <summary>
-	/// Smoothly rotates the player's visual mesh to face the camera-relative movement direction.
-    /// Player faces the direction they're moving relative to where the camera is looking.
+    /// <summary>
+    /// Smoothly rotates the character root to face the camera-relative stick direction.
     /// </summary>
     /// <param name="inputDir">Raw 2D input vector.</param>
     /// <param name="delta">Frame delta time for smooth interpolation.</param>
-    protected void RotateVisuals(Vector2 inputDir, double delta)
+    protected void RotateCharacter(Vector2 inputDir, double delta)
     {
-        if (Player.Visuals != null && inputDir != Vector2.Zero)
-        {
-            // Get the camera-relative movement direction
-            Vector3 direction = GetCameraRelativeDirection(inputDir);
+        if (inputDir == Vector2.Zero)
+            return;
 
-            // Calculate target angle from the camera-relative direction
-            float targetAngle = Mathf.Atan2(direction.X, direction.Z);
+        Vector3 direction = GetCameraRelativeDirection(inputDir);
+        if (direction == Vector3.Zero)
+            return;
 
-            // Smoothly interpolate current rotation to target
-            Vector3 rotation = Player.Visuals.Rotation;
-            rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
-            Player.Visuals.Rotation = rotation;
-        }
+        float targetAngle = Mathf.Atan2(direction.X, direction.Z);
+        Vector3 rotation = Player.Rotation;
+        rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
+        Player.Rotation = rotation;
     }
 }
