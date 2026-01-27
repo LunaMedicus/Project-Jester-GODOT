@@ -18,12 +18,12 @@ public partial class AirState : BaseState
 
 	public override void PhysicsUpdate(double delta)
 	{
-	   // === Update Coyote Time Timer ===
+	   // Update coyote time timer.
 	   Player.TimeSinceGrounded += (float)delta;
 
-	   // === State Transition Checks ===
+	   // State transitions.
 
-	   // Coyote Time Jump - Allow jumping shortly after leaving ground
+	   // Coyote jump shortly after leaving ground.
 	   if (Input.IsActionJustPressed("ui_accept") && Player.CanUseCoyoteTime && Player.TimeSinceGrounded <= Player.CoyoteTime)
 	   {
 		  Player.CanUseCoyoteTime = false; // Consume coyote time
@@ -31,12 +31,10 @@ public partial class AirState : BaseState
 		  return;
 	   }
 
-	   // Dash in air -> Dive attack
+	   // Dash in air -> Dive attack.
 	   if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
 
-	   // === NEW: Pole Climbing Logic ===
-	   // Check if we hit a pole while holding forward
-	   // Note: Ensure you created the "PoleCheck" node in the player scene!
+	   // Pole climbing check (requires "PoleCheck" node).
 	   if (Player.HasNode("PoleCheck"))
 	   {
 		  ShapeCast3D poleCheck = Player.GetNode<ShapeCast3D>("PoleCheck");
@@ -50,8 +48,7 @@ public partial class AirState : BaseState
 		  }
 	   }
 
-	   // === NEW: Ledge Grab Logic ===
-	   // Check for ledge if falling
+	   // Ledge grab check while falling (requires "LedgeChecks" rays).
 	   if (Player.HasNode("LedgeChecks/LedgeWallRay") && Player.HasNode("LedgeChecks/LedgeTopRay"))
 	   {
 		  RayCast3D wallRay = Player.GetNode<RayCast3D>("LedgeChecks/LedgeWallRay");
@@ -68,25 +65,25 @@ public partial class AirState : BaseState
 		  }
 	   }
 
-	   // === Apply Gravity ===
+	   // Apply gravity.
 	   Vector3 velocity = Player.Velocity;
 	   velocity.Y -= Player.Gravity * (float)delta;
 	   Player.Velocity = velocity;
 
-	   // === Air Control ===
+	   // Air control.
 	   Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
 	   Vector3 direction = GetCameraRelativeDirection(inputDir);
 
 	   if (direction != Vector3.Zero)
 	   {
-		 // Rotate character to face stick direction in camera space
-		 RotateCharacter(inputDir, delta);
+		 // Rotate character to face stick direction in camera space.
+		 RotateCharacter(direction, delta);
 		 ApplyAirMovement(direction);
 	   }
 
 	   ClampHorizontalSpeed();
 
-	   // === Landing Check ===
+	   // Landing check.
 	   if (Player.IsOnFloor())
 	   {
 		 if (inputDir == Vector2.Zero)

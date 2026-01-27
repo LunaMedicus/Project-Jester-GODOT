@@ -38,17 +38,20 @@ public abstract partial class BaseState : Node
 	// --- HELPER FUNCTIONS (Shared Logic) ---
 
 	/// <summary>
-	/// Converts 2D input direction to a 3D direction relative to the camera.
+	/// Converts 2D input direction to a camera-relative 3D direction on the XZ plane.
 	/// </summary>
 	protected Vector3 GetCameraRelativeDirection(Vector2 inputDir)
 	{
-	   if (inputDir == Vector2.Zero) return Vector3.Zero;
+	   if (inputDir == Vector2.Zero)
+		  return Vector3.Zero;
 
 	   Vector3 camForward = -Player.CameraRig.GameplayCamera.GlobalTransform.Basis.Z;
 	   Vector3 camRight = Player.CameraRig.GameplayCamera.GlobalTransform.Basis.X;
 
-	   camForward.Y = 0; camForward = camForward.Normalized();
-	   camRight.Y = 0; camRight = camRight.Normalized();
+	   camForward.Y = 0;
+	   camForward = camForward.Normalized();
+	   camRight.Y = 0;
+	   camRight = camRight.Normalized();
 
 	   return (camForward * -inputDir.Y + camRight * inputDir.X).Normalized();
 	}
@@ -79,23 +82,17 @@ public abstract partial class BaseState : Node
 	   }
 	}
 
-    /// <summary>
-    /// Smoothly rotates the character root to face the camera-relative stick direction.
-    /// </summary>
-    /// <param name="inputDir">Raw 2D input vector.</param>
-    /// <param name="delta">Frame delta time for smooth interpolation.</param>
-    protected void RotateCharacter(Vector2 inputDir, double delta)
-    {
-        if (inputDir == Vector2.Zero)
-            return;
+	/// <summary>
+	/// Smoothly rotates the character root to face a world-space direction on the XZ plane.
+	/// </summary>
+	protected void RotateCharacter(Vector3 direction, double delta)
+	{
+	   if (direction == Vector3.Zero)
+		  return;
 
-        Vector3 direction = GetCameraRelativeDirection(inputDir);
-        if (direction == Vector3.Zero)
-            return;
-
-        float targetAngle = Mathf.Atan2(direction.X, direction.Z);
-        Vector3 rotation = Player.Rotation;
-        rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
-        Player.Rotation = rotation;
-    }
+	   float targetAngle = Mathf.Atan2(direction.X, direction.Z);
+	   Vector3 rotation = Player.Rotation;
+	   rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
+	   Player.Rotation = rotation;
+	}
 }

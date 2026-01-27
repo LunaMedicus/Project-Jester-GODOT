@@ -51,7 +51,7 @@ public partial class WallRunState : BaseState
             Vector3 runDirection = Player.WallNormal.Cross(Vector3.Up).Normalized() * _directionMultiplier;
             velocity.X = runDirection.X * Player.WallRunSpeed;
             velocity.Z = runDirection.Z * Player.WallRunSpeed;
-            RotateCharacter(new Vector2(runDirection.X, runDirection.Z), delta);
+            RotateCharacter(runDirection, delta);
         }
         else
         {

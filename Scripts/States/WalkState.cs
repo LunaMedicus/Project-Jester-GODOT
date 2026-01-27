@@ -14,8 +14,7 @@ public partial class WalkState : BaseState
 
     public override void PhysicsUpdate(double delta)
     {
-        // === State Transition Checks ===
-        // Check these first before processing movement
+        // State transitions before movement.
 
         // Fell off edge -> Air state (enable coyote time since we walked off, not jumped)
         if (!Player.IsOnFloor())
@@ -31,31 +30,29 @@ public partial class WalkState : BaseState
         // Dash input -> Dash state
         if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDash); return; }
 
-        // === Movement Processing ===
-        // Get raw input
+        // Movement processing.
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
 
-        // Convert to camera-relative direction (For Movement Velocity)
+        // Camera-relative movement direction.
         Vector3 direction = GetCameraRelativeDirection(inputDir);
 
         if (direction != Vector3.Zero)
         {
-            // === Analog Speed Control ===
-            // Stick strength (0-1) controls speed for analog stick support
+            // Analog speed control (0-1 from stick strength).
             float stickStrength = Mathf.Min(inputDir.Length(), 1.0f);
             float currentSpeed = Player.RunSpeed * stickStrength;
 
-            // Deadzone - if speed too low, don't move (prevents drift)
+            // Deadzone to prevent drift.
             if (currentSpeed < 1.0f) currentSpeed = 0f;
 
-            // Apply velocity in movement direction (preserve Y for slopes)
+            // Apply horizontal velocity (preserve Y for slopes).
             Player.Velocity = new Vector3(direction.X * currentSpeed, Player.Velocity.Y, direction.Z * currentSpeed);
 
-            // Prevent exceeding max speed
+            // Prevent exceeding max speed.
             ClampHorizontalSpeed();
 
-            // Rotate character to face stick direction in camera space
-            RotateCharacter(inputDir, delta);
+            // Rotate character to face stick direction in camera space.
+            RotateCharacter(direction, delta);
         }
         else
         {
