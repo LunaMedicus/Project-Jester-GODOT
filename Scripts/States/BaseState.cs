@@ -6,6 +6,17 @@ using Godot;
 /// </summary>
 public abstract partial class BaseState : Node
 {
+	// --- CONSTANTS ---
+	/// <summary>Character rotation interpolation speed (radians per second).</summary>
+	protected const float CharacterRotationSpeed = 10.0f;
+
+	/// <summary>Threshold for considering a direction as non-zero.</summary>
+	protected const float DirectionThreshold = 0.001f;
+
+	/// <summary>Raycast distance for world interactions.</summary>
+	protected const float RaycastMaxDistance = 1000.0f;
+
+	// --- REFERENCES ---
 	/// <summary>
 	/// Reference to the player controller that owns this state.
 	/// Used to access player properties, velocity, and state transitions.
@@ -92,7 +103,7 @@ public abstract partial class BaseState : Node
 
 	   float targetAngle = Mathf.Atan2(direction.X, direction.Z);
 	   Vector3 rotation = Player.Rotation;
-	   rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, 10.0f * (float)delta);
+	   rotation.Y = Mathf.LerpAngle(rotation.Y, targetAngle, CharacterRotationSpeed * (float)delta);
 	   Player.Rotation = rotation;
 	}
 }

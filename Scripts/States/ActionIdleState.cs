@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class ActionIdleState : BaseState
 {
@@ -18,6 +17,11 @@ public partial class ActionIdleState : BaseState
         }
     }
 
-    public override void Update(double delta) {}
-    public override void Exit() {}
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }

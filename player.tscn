@@ -192,7 +192,7 @@ target_position = Vector3(0.8, 0, 0)
 target_position = Vector3(-0.8, 0, 0)
 
 [node name="PoleCheck" type="ShapeCast3D" parent="." unique_id=1331340083]
-transform = Transform3D(1.6854006, 0, 0, 0, 2.342095, 0, 0, 0, 1.3284544, 0, 0, 1.3236511)
+transform = Transform3D(1.785317, 0, 0, 0, 1.785317, 0, 0, 0, 1.785317, 0, 0, 1.3236511)
 shape = SubResource("SphereShape3D_op7ga")
 target_position = Vector3(0, 0, -1)
 collision_mask = 8

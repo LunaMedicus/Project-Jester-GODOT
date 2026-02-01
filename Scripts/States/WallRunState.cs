@@ -12,7 +12,6 @@ public partial class WallRunState : BaseState
 
     public override void Enter()
     {
-        GD.Print("Entered WallRun");
         
         // Small upward velocity to stick to wall initially
         Player.Velocity = new Vector3(Player.Velocity.X, 0.5f, Player.Velocity.Z);
@@ -106,7 +105,9 @@ public partial class WallRunState : BaseState
             Player.CameraRig.TargetTilt = Mathf.DegToRad(-Player.CameraRig.TiltSpeed);
     }
 
-    public override void Update(double delta) { }
+    public override void Update(double delta)
+    {
+    }
 
     public override void Exit()
     {

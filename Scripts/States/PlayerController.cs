@@ -12,6 +12,20 @@ using System;
 /// </summary>
 public partial class PlayerController : CharacterBody3D
 {
+    #region Constants & Magic Numbers
+    /// <summary>Minimum horizontal velocity threshold for animation blending.</summary>
+    private const float MinHorizontalSpeedThreshold = 0.01f;
+
+    /// <summary>Minimum direction magnitude to consider valid for animation.</summary>
+    private const float MinDirectionMagnitude = 0.001f;
+
+    /// <summary>Node path for MoveFSM container.</summary>
+    private const string MoveFsmPath = "MoveFSM";
+
+    /// <summary>Node path for ActionFSM container.</summary>
+    private const string ActionFsmPath = "ActionFSM";
+    #endregion
+
     #region Movement Settings
     /// <summary>Speed settings for ground and air movement.</summary>
     [ExportGroup("Movement")]
@@ -108,8 +122,13 @@ public partial class PlayerController : CharacterBody3D
     /// <summary>AnimationTree controlling player animations.</summary>
     [Export] public AnimationTree AnimationTree;
 
+    /// <summary>Path to locomotion blend parameter in AnimationTree.</summary>
     private const string LocomotionBlendPath = "parameters/WalkState/blend_position";
+
+    /// <summary>Current locomotion blend position for smooth transitions.</summary>
     private Vector2 _locomotionBlend = Vector2.Zero;
+
+    /// <summary>Speed at which locomotion blend interpolates toward target direction.</summary>
     [Export] public float LocomotionBlendSpeed = 8.0f;
     #endregion
 
@@ -160,10 +179,10 @@ public partial class PlayerController : CharacterBody3D
     /// <summary>Ground roll (after dive or slide hop).</summary>
     public BaseState StateDiveRoll;
 
-    /// <summary>
+    /// <summary>Climbing vertical poles and vines.</summary>
     public BaseState StatePoleClimb;
 
-    /// <summary>
+    /// <summary>Grabbing onto ledges for recovery.</summary>
     public BaseState StateLedgeGrab;
 
     // -- Action States --
@@ -189,23 +208,39 @@ public partial class PlayerController : CharacterBody3D
     /// </summary>
     public override void _Ready()
     {
-        // 1. Get Movement Nodes (From MoveFSM container)
-        StateIdle = GetNode<BaseState>("MoveFSM/Idle");
-        StateWalk = GetNode<BaseState>("MoveFSM/Walk");
-        StateAir = GetNode<BaseState>("MoveFSM/Air");
-        StateJump = GetNode<BaseState>("MoveFSM/Jump");
-        StateWallRun = GetNode<BaseState>("MoveFSM/WallRun");
-        StateDash = GetNode<BaseState>("MoveFSM/Dash");
-        StateDive = GetNode<BaseState>("MoveFSM/Dive");
-        StateDiveRoll = GetNode<BaseState>("MoveFSM/DiveRoll");
-        StatePoleClimb = GetNode<BaseState>("MoveFSM/PoleClimb");
-        StateLedgeGrab = GetNode<BaseState>("MoveFSM/LedgeGrab");
+        InitializeMovementStates();
+        InitializeActionStates();
+        InitializeStateMachines();
+        SetupInput();
+        SetupAnimation();
+    }
 
-        // 2. Get Action Nodes (From ActionFSM container)
-        StateActionIdle = GetNode<BaseState>("ActionFSM/ActionIdle");
-        StateAttack = GetNode<BaseState>("ActionFSM/Attack");
+    /// <summary>Loads all movement (legs) state references from the scene tree.</summary>
+    private void InitializeMovementStates()
+    {
+        StateIdle = GetNode<BaseState>($"{MoveFsmPath}/Idle");
+        StateWalk = GetNode<BaseState>($"{MoveFsmPath}/Walk");
+        StateAir = GetNode<BaseState>($"{MoveFsmPath}/Air");
+        StateJump = GetNode<BaseState>($"{MoveFsmPath}/Jump");
+        StateWallRun = GetNode<BaseState>($"{MoveFsmPath}/WallRun");
+        StateDash = GetNode<BaseState>($"{MoveFsmPath}/Dash");
+        StateDive = GetNode<BaseState>($"{MoveFsmPath}/Dive");
+        StateDiveRoll = GetNode<BaseState>($"{MoveFsmPath}/DiveRoll");
+        StatePoleClimb = GetNode<BaseState>($"{MoveFsmPath}/PoleClimb");
+        StateLedgeGrab = GetNode<BaseState>($"{MoveFsmPath}/LedgeGrab");
+    }
 
-        // 3. Initialize All States
+    /// <summary>Loads all action (arms) state references from the scene tree.</summary>
+    private void InitializeActionStates()
+    {
+        StateActionIdle = GetNode<BaseState>($"{ActionFsmPath}/ActionIdle");
+        StateAttack = GetNode<BaseState>($"{ActionFsmPath}/Attack");
+    }
+
+    /// <summary>Initializes all loaded states and starts both FSMs.</summary>
+    private void InitializeStateMachines()
+    {
+        // Initialize all states with reference to this controller
         StateIdle.Init(this);
         StateWalk.Init(this);
         StateAir.Init(this);
@@ -219,14 +254,20 @@ public partial class PlayerController : CharacterBody3D
         StateActionIdle.Init(this);
         StateAttack.Init(this);
 
-
-        // 4. Start BOTH Machines
+        // Start both finite state machines
         ChangeMoveState(StateIdle);
         ChangeActionState(StateActionIdle);
+    }
 
+    /// <summary>Configures input handling.</summary>
+    private void SetupInput()
+    {
         Input.MouseMode = Input.MouseModeEnum.Captured;
+    }
 
-        // Ensure AnimationTree is active
+    /// <summary>Ensures animation systems are active and ready.</summary>
+    private void SetupAnimation()
+    {
         if (AnimationTree != null)
             AnimationTree.Active = true;
     }
@@ -285,25 +326,31 @@ public partial class PlayerController : CharacterBody3D
         if (AnimationTree == null)
             return;
 
+        // Extract horizontal velocity (ignore vertical movement)
         Vector3 horizontalVelocity = Velocity;
         horizontalVelocity.Y = 0f;
 
         float speed = horizontalVelocity.Length();
         Vector2 targetBlend = Vector2.Zero;
 
-        if (speed > 0.01f)
+        // Only compute blend when moving significantly
+        if (speed > MinHorizontalSpeedThreshold)
         {
+            // Convert global velocity to local player space for directional blending
             Vector3 localVelocity = GlobalTransform.Basis.Inverse() * horizontalVelocity;
-            Vector2 localDir = new Vector2(localVelocity.X, localVelocity.Z);
-            if (localDir.Length() > 0.001f)
+            Vector2 localDirection = new Vector2(localVelocity.X, localVelocity.Z);
+
+            if (localDirection.Length() > MinDirectionMagnitude)
             {
+                // Blend factor: 0 = stationary, 1 = running at full speed
                 float speedFactor = Mathf.Clamp(speed / Mathf.Max(RunSpeed, 0.01f), 0f, 1f);
-                targetBlend = localDir.Normalized() * speedFactor;
+                targetBlend = localDirection.Normalized() * speedFactor;
             }
         }
 
-        float move = (float)delta * LocomotionBlendSpeed;
-        _locomotionBlend = _locomotionBlend.MoveToward(targetBlend, move);
+        // Smoothly interpolate toward target blend position
+        float blendDelta = (float)delta * LocomotionBlendSpeed;
+        _locomotionBlend = _locomotionBlend.MoveToward(targetBlend, blendDelta);
         AnimationTree.Set(LocomotionBlendPath, _locomotionBlend);
     }
 }

@@ -1,11 +1,9 @@
 using Godot;
-using System;
 
 public partial class PoleClimbState : BaseState
 {
     public override void Enter()
     {
-        GD.Print("Entered PoleClimb");
         Player.Velocity = Vector3.Zero; // Stop moving instantly
     }
 
@@ -57,6 +55,11 @@ public partial class PoleClimbState : BaseState
         }
     }
 
-    public override void Update(double delta) {}
-    public override void Exit() {}
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }

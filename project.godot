@@ -119,3 +119,7 @@ camera_down={
 3d_physics/layer_2="Player"
 3d_physics/layer_3="Enemies"
 3d_physics/layer_4="Climbable"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"

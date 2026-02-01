@@ -86,17 +86,18 @@ shadow_enabled = true
 
 [node name="Player" parent="." unique_id=1350625586 instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6989336, 1.5379684, 1.1073625)
+RunSpeed = 10.0
 JumpVelocity = 10.0
+Gravity = 10.0
 MaxSpeed = 35.0
 AirSpeedMultiplier = 0.5
-WallRunGravity = 5.0
+WallRunGravity = 6.0
 WallJumpForce = 2.0
 WallRunSpeed = 20.0
 WallJumpInputInfluence = 3.0
-DiveVerticalSpeed = 5.0
 DiveForwardSpeed = 20.0
-DiveRollSpeed = 10.0
-DiveRollDuration = 0.2
+DiveRollSpeed = 15.0
+DiveRollDuration = 0.25
 RollControlStrength = 100.0
 
 [node name="FloatingMask" parent="." unique_id=1922551037 instance=ExtResource("2_uu6xs")]
@@ -118,7 +119,7 @@ transform = Transform3D(1, 0, 0, 0, 5, 0, 0, 0, 1, 0, 4.0113626, 0)
 mesh = SubResource("CylinderMesh_r0du0")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=433633547]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.004589, 3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.004589, 3.8754969, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=222957614]
 shape = SubResource("BoxShape3D_r0du0")

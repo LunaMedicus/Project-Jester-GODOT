@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 /// <summary>
 /// Third-person camera controller with mouse/gamepad support.

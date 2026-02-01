@@ -9,8 +9,6 @@ public partial class JumpState : BaseState
 {
     public override void Enter()
     {
-        GD.Print("Entered Jump");
-
         // Apply upward velocity while preserving horizontal momentum
         Player.Velocity = new Vector3(Player.Velocity.X, Player.JumpVelocity, Player.Velocity.Z);
     }
@@ -68,6 +66,11 @@ public partial class JumpState : BaseState
         }
     }
 
-    public override void Update(double delta) { }
-    public override void Exit() { }
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }

@@ -12,7 +12,6 @@ public partial class DashState : BaseState
 
     public override void Enter()
     {
-        GD.Print("Entered Dash");
         _timer = Player.DashDuration;
 
         // === Determine Dash Direction ===
@@ -57,6 +56,11 @@ public partial class DashState : BaseState
         }
     }
 
-    public override void Update(double delta) { }
-    public override void Exit() { }
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }

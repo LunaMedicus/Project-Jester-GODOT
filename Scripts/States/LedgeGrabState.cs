@@ -1,11 +1,9 @@
 using Godot;
-using System;
 
 public partial class LedgeGrabState : BaseState
 {
     public override void Enter()
     {
-        GD.Print("Entered LedgeGrab");
         Player.Velocity = Vector3.Zero; 
         // TODO: Snap player position so hands align with ledge
     }
@@ -41,6 +39,11 @@ public partial class LedgeGrabState : BaseState
         }
     }
 
-    public override void Update(double delta) {}
-    public override void Exit() {}
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }

@@ -21,8 +21,6 @@ public partial class DiveRollState : BaseState
 
     public override void Enter()
     {
-        GD.Print("Entered DiveRoll");
-
         // Initialize roll duration timer
         _timer = Player.DiveRollDuration;
 
@@ -120,6 +118,11 @@ public partial class DiveRollState : BaseState
         }
     }
 
-    public override void Update(double delta) { }
-    public override void Exit() { }
+    public override void Update(double delta)
+    {
+    }
+
+    public override void Exit()
+    {
+    }
 }
