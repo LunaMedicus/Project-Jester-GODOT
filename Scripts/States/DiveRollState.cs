@@ -21,6 +21,7 @@ public partial class DiveRollState : BaseState
 
     public override void Enter()
     {
+        GD.Print("[DiveRoll] Enter");
         // Initialize roll duration timer
         _timer = Player.DiveRollDuration;
 

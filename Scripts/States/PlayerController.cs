@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 /// <summary>
 /// Main player controller using a Dual Finite State Machine architecture.
@@ -154,6 +153,18 @@ public partial class PlayerController : CharacterBody3D
     /// <summary>The currently active action state (Arms).</summary>
     private BaseState _currentActionState;
 
+    // -- Cached Nodes (for performance) --
+    /// <summary>Cached pole climbing detection sensor.</summary>
+    private ShapeCast3D _cachedPoleCheck;
+
+    /// <summary>Cached wall raycasts for collision detection.</summary>
+    private RayCast3D _cachedRightWall;
+    private RayCast3D _cachedLeftWall;
+
+    /// <summary>Cached ledge grab detection rays.</summary>
+    private RayCast3D _cachedLedgeWallRay;
+    private RayCast3D _cachedLedgeTopRay;
+
     // -- Move States --
     /// <summary>Standing still on ground.</summary>
     public BaseState StateIdle;
@@ -270,7 +281,56 @@ public partial class PlayerController : CharacterBody3D
     {
         if (AnimationTree != null)
             AnimationTree.Active = true;
+
+        // Cache collision detection nodes for performance
+        CacheCollisionNodes();
     }
+
+    /// <summary>Caches commonly-used collision detection nodes to avoid repeated GetNode calls.</summary>
+    private void CacheCollisionNodes()
+    {
+        try
+        {
+            _cachedPoleCheck = GetNode<ShapeCast3D>("PoleCheck");
+        }
+        catch
+        {
+            _cachedPoleCheck = null;
+        }
+
+        try
+        {
+            _cachedRightWall = GetNode<RayCast3D>("WallChecks/RightWall");
+            _cachedLeftWall = GetNode<RayCast3D>("WallChecks/LeftWall");
+        }
+        catch
+        {
+            _cachedRightWall = null;
+            _cachedLeftWall = null;
+        }
+
+        try
+        {
+            _cachedLedgeWallRay = GetNode<RayCast3D>("LedgeChecks/LedgeWallRay");
+            _cachedLedgeTopRay = GetNode<RayCast3D>("LedgeChecks/LedgeTopRay");
+        }
+        catch
+        {
+            _cachedLedgeWallRay = null;
+            _cachedLedgeTopRay = null;
+        }
+    }
+
+    /// <summary>Gets cached pole check node (returns null if not found).</summary>
+    public ShapeCast3D GetPoleCheck() => _cachedPoleCheck;
+
+    /// <summary>Gets cached wall raycasts.</summary>
+    public RayCast3D GetRightWall() => _cachedRightWall;
+    public RayCast3D GetLeftWall() => _cachedLeftWall;
+
+    /// <summary>Gets cached ledge detection raycasts.</summary>
+    public RayCast3D GetLedgeWallRay() => _cachedLedgeWallRay;
+    public RayCast3D GetLedgeTopRay() => _cachedLedgeTopRay;
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -327,30 +387,38 @@ public partial class PlayerController : CharacterBody3D
             return;
 
         // Extract horizontal velocity (ignore vertical movement)
-        Vector3 horizontalVelocity = Velocity;
-        horizontalVelocity.Y = 0f;
-
-        float speed = horizontalVelocity.Length();
-        Vector2 targetBlend = Vector2.Zero;
+        float velX = Velocity.X;
+        float velZ = Velocity.Z;
+        float speed = Mathf.Sqrt(velX * velX + velZ * velZ);  // Faster than Vector3.Length()
 
         // Only compute blend when moving significantly
-        if (speed > MinHorizontalSpeedThreshold)
+        if (speed <= MinHorizontalSpeedThreshold)
         {
-            // Convert global velocity to local player space for directional blending
-            Vector3 localVelocity = GlobalTransform.Basis.Inverse() * horizontalVelocity;
-            Vector2 localDirection = new Vector2(localVelocity.X, localVelocity.Z);
+            // Smoothly return to stationary blend
+            float blendDelta = (float)delta * LocomotionBlendSpeed;
+            _locomotionBlend = _locomotionBlend.MoveToward(Vector2.Zero, blendDelta);
+            AnimationTree.Set(LocomotionBlendPath, _locomotionBlend);
+            return;
+        }
 
-            if (localDirection.Length() > MinDirectionMagnitude)
-            {
-                // Blend factor: 0 = stationary, 1 = running at full speed
-                float speedFactor = Mathf.Clamp(speed / Mathf.Max(RunSpeed, 0.01f), 0f, 1f);
-                targetBlend = localDirection.Normalized() * speedFactor;
-            }
+        // Convert global velocity to local player space for directional blending
+        Vector3 localVelocity = GlobalTransform.Basis.Inverse() * new Vector3(velX, 0, velZ);
+        float localX = localVelocity.X;
+        float localZ = localVelocity.Z;
+        float directionMagnitude = Mathf.Sqrt(localX * localX + localZ * localZ);
+
+        Vector2 targetBlend = Vector2.Zero;
+        if (directionMagnitude > MinDirectionMagnitude)
+        {
+            // Blend factor: 0 = stationary, 1 = running at full speed
+            float speedFactor = Mathf.Clamp(speed / Mathf.Max(RunSpeed, 0.01f), 0f, 1f);
+            float invMagnitude = 1.0f / directionMagnitude;
+            targetBlend = new Vector2(localX * invMagnitude * speedFactor, localZ * invMagnitude * speedFactor);
         }
 
         // Smoothly interpolate toward target blend position
-        float blendDelta = (float)delta * LocomotionBlendSpeed;
-        _locomotionBlend = _locomotionBlend.MoveToward(targetBlend, blendDelta);
+        float blendSpeed = (float)delta * LocomotionBlendSpeed;
+        _locomotionBlend = _locomotionBlend.MoveToward(targetBlend, blendSpeed);
         AnimationTree.Set(LocomotionBlendPath, _locomotionBlend);
     }
 }

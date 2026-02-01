@@ -9,8 +9,6 @@ public partial class AttackState : BaseState
 {
     // --- CONSTANTS ---
     private const float AttackDuration = 0.2f;
-    private const string RightWallCheckPath = "WallChecks/RightWall";
-    private const string LeftWallCheckPath = "WallChecks/LeftWall";
     private const float RaycastDistance = 1000.0f;
     private const float CardSpinMagnitude = 20.0f;
 
@@ -20,6 +18,7 @@ public partial class AttackState : BaseState
 
     public override void Enter()
     {
+        GD.Print("[Attack] Enter");
         _attackTimer = AttackDuration;
 
         if (Player.CardScene == null)
@@ -52,9 +51,9 @@ public partial class AttackState : BaseState
     /// <summary>Selects spawn point: right hand by default, left if right is blocked by wall.</summary>
     private Node3D SelectHandSpawnPoint()
     {
-        RayCast3D rightWallRay = Player.GetNode<RayCast3D>(RightWallCheckPath);
+        RayCast3D rightWallRay = Player.GetRightWall();
         
-        if (rightWallRay.IsColliding())
+        if (rightWallRay != null && rightWallRay.IsColliding())
             return Player.LeftHandPos;
         
         return Player.RightHandPos;

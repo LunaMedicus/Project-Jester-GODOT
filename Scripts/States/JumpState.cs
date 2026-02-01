@@ -9,6 +9,7 @@ public partial class JumpState : BaseState
 {
     public override void Enter()
     {
+        GD.Print("[Jump] Enter");
         // Apply upward velocity while preserving horizontal momentum
         Player.Velocity = new Vector3(Player.Velocity.X, Player.JumpVelocity, Player.Velocity.Z);
     }
@@ -18,11 +19,12 @@ public partial class JumpState : BaseState
         // State transitions.
 
         // Dash during jump -> Dive.
-        if (Input.IsActionJustPressed("dash")) { Player.ChangeMoveState(Player.StateDive); return; }
+        if (Input.IsActionJustPressed("dash")) { GD.Print("[Jump] Dash"); Player.ChangeMoveState(Player.StateDive); return; }
 
         // Variable jump height (release early for a shorter jump).
         if (Input.IsActionJustReleased("ui_accept") && Player.Velocity.Y > 0)
         {
+            GD.Print("[Jump] Cut");
             Vector3 cutVelocity = Player.Velocity;
             cutVelocity.Y *= 0.5f;  // Halve upward velocity
             Player.Velocity = cutVelocity;
@@ -52,6 +54,7 @@ public partial class JumpState : BaseState
         // Transition to falling when vertical velocity flips.
         if (Player.Velocity.Y < 0)
         {
+            GD.Print("[Jump] Start falling");
             Player.ChangeMoveState(Player.StateAir);
             return;
         }
@@ -60,9 +63,15 @@ public partial class JumpState : BaseState
         if (Player.IsOnFloor())
         {
             if (inputDir == Vector2.Zero)
+            {
+                GD.Print("[Jump] Land -> Idle");
                 Player.ChangeMoveState(Player.StateIdle);
+            }
             else
+            {
+                GD.Print("[Jump] Land -> Walk");
                 Player.ChangeMoveState(Player.StateWalk);
+            }
         }
     }
 

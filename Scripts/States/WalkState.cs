@@ -15,6 +15,7 @@ public partial class WalkState : BaseState
 
     public override void Enter()
     {
+        GD.Print("[Walk] Enter");
         // No special setup needed - velocity is set in PhysicsUpdate
     }
 
@@ -39,6 +40,7 @@ public partial class WalkState : BaseState
     {
         if (!Player.IsOnFloor())
         {
+            GD.Print("[Walk] Fall off edge");
             Player.CanUseCoyoteTime = true;
             Player.ChangeMoveState(Player.StateAir);
             return true;
@@ -51,6 +53,7 @@ public partial class WalkState : BaseState
     {
         if (Input.IsActionJustPressed("ui_accept"))
         {
+            GD.Print("[Walk] Jump");
             Player.ChangeMoveState(Player.StateJump);
             return true;
         }
@@ -62,6 +65,7 @@ public partial class WalkState : BaseState
     {
         if (Input.IsActionJustPressed("dash"))
         {
+            GD.Print("[Walk] Dash");
             Player.ChangeMoveState(Player.StateDash);
             return true;
         }
@@ -75,6 +79,7 @@ public partial class WalkState : BaseState
 
         if (inputDir == Vector2.Zero)
         {
+            GD.Print("[Walk] No input -> Idle");
             // No input - return to idle
             Player.ChangeMoveState(Player.StateIdle);
             return;

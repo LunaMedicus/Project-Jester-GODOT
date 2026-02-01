@@ -4,6 +4,7 @@ public partial class ActionIdleState : BaseState
 {
     public override void Enter()
     {
+        GD.Print("[ActionIdle] Enter");
         // Hands are ready
     }
 

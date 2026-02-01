@@ -12,7 +12,7 @@ public partial class WallRunState : BaseState
 
     public override void Enter()
     {
-        
+        GD.Print("[WallRun] Enter");
         // Small upward velocity to stick to wall initially
         Player.Velocity = new Vector3(Player.Velocity.X, 0.5f, Player.Velocity.Z);
 
@@ -32,13 +32,13 @@ public partial class WallRunState : BaseState
     public override void PhysicsUpdate(double delta)
     {
         // === State Transitions ===
-        if (Input.IsActionJustPressed("ui_accept")) { WallJump(); return; }
-        if (Input.IsActionJustPressed("dash")) { WallDive(); return; }
+        if (Input.IsActionJustPressed("ui_accept")) { GD.Print("[WallRun] Jump"); WallJump(); return; }
+        if (Input.IsActionJustPressed("dash")) { GD.Print("[WallRun] Dive"); WallDive(); return; }
 
         // === Camera Tilt ===
-        RayCast3D rightRay = Player.GetNode<RayCast3D>("WallChecks/RightWall");
-        RayCast3D leftRay = Player.GetNode<RayCast3D>("WallChecks/LeftWall");
-        ApplyCameraTilt(rightRay.IsColliding(), leftRay.IsColliding());
+        RayCast3D rightRay = Player.GetRightWall();
+        RayCast3D leftRay = Player.GetLeftWall();
+        ApplyCameraTilt(rightRay != null && rightRay.IsColliding(), leftRay != null && leftRay.IsColliding());
 
         // === Movement ===
         Vector3 velocity = Player.Velocity;

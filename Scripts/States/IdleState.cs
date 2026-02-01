@@ -8,6 +8,7 @@ public partial class IdleState : BaseState
 {
     public override void Enter()
     {
+        GD.Print("[Idle] Enter");
         // Stop horizontal movement but preserve vertical velocity (for landing/slopes)
         Player.Velocity = new Vector3(0, Player.Velocity.Y, 0);
     }
@@ -32,6 +33,7 @@ public partial class IdleState : BaseState
     {
         if (!Player.IsOnFloor())
         {
+            GD.Print("[Idle] Fall off edge");
             Player.CanUseCoyoteTime = true;
             Player.ChangeMoveState(Player.StateAir);
             return true;
@@ -44,6 +46,7 @@ public partial class IdleState : BaseState
     {
         if (Input.IsActionJustPressed("ui_accept"))
         {
+            GD.Print("[Idle] Jump");
             Player.ChangeMoveState(Player.StateJump);
             return true;
         }
@@ -55,6 +58,7 @@ public partial class IdleState : BaseState
     {
         if (Input.IsActionJustPressed("dash"))
         {
+            GD.Print("[Idle] Dash");
             Player.ChangeMoveState(Player.StateDash);
             return true;
         }
@@ -67,6 +71,7 @@ public partial class IdleState : BaseState
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         if (inputDir != Vector2.Zero)
         {
+            GD.Print("[Idle] Start walking");
             Player.ChangeMoveState(Player.StateWalk);
         }
     }

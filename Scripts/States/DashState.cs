@@ -12,6 +12,7 @@ public partial class DashState : BaseState
 
     public override void Enter()
     {
+        GD.Print("[Dash] Enter");
         _timer = Player.DashDuration;
 
         // === Determine Dash Direction ===
@@ -41,6 +42,7 @@ public partial class DashState : BaseState
         // transition to slide (DiveRoll) for momentum preservation
         if (Player.IsOnFloor() && Input.IsActionJustPressed("dash"))
         {
+            GD.Print("[Dash] Slide hop");
             Player.ChangeMoveState(Player.StateDiveRoll);
             return;
         }
@@ -48,11 +50,18 @@ public partial class DashState : BaseState
         // === Dash Duration Ended ===
         if (_timer <= 0)
         {
+            GD.Print("[Dash] End");
             // Transition based on remaining velocity
             if (Player.Velocity.Length() > 0.1f)
+            {
+                GD.Print("[Dash] End -> Walk");
                 Player.ChangeMoveState(Player.StateWalk);  // Still moving -> Walk
+            }
             else
+            {
+                GD.Print("[Dash] End -> Idle");
                 Player.ChangeMoveState(Player.StateIdle);  // Stopped -> Idle
+            }
         }
     }
 

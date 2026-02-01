@@ -8,8 +8,6 @@ using Godot;
 public partial class DiveState : BaseState
 {
     // --- CONSTANTS ---
-    private const string RightWallCheckPath = "WallChecks/RightWall";
-    private const string LeftWallCheckPath = "WallChecks/LeftWall";
     private const float MinMomentumThreshold = 0.1f;
     private const float BonkVelocityMultiplier = 0.2f;
     private const float MinDiveTimeBeforeLanding = 0.1f;
@@ -20,6 +18,7 @@ public partial class DiveState : BaseState
 
     public override void Enter()
     {
+        GD.Print("[Dive] Enter");
         _diveElapsedTime = 0;
         Vector3 diveDirection = CalculateDiveDirection();
         ApplyDiveVelocity(diveDirection);
@@ -31,6 +30,10 @@ public partial class DiveState : BaseState
 
         ApplyDiveAirControl(delta);
         ClampHorizontalSpeed();
+
+        // Check for ledge grabs first (higher priority than wall grabs)
+        if (TryGrabLedge())
+            return;
 
         // Check for wall grabs
         if (TryGrabWall())
@@ -93,20 +96,46 @@ public partial class DiveState : BaseState
     /// <summary>Attempts to grab a wall while diving.</summary>
     private bool TryGrabWall()
     {
-        RayCast3D rightRay = Player.GetNode<RayCast3D>(RightWallCheckPath);
-        RayCast3D leftRay = Player.GetNode<RayCast3D>(LeftWallCheckPath);
+        RayCast3D rightRay = Player.GetRightWall();
+        RayCast3D leftRay = Player.GetLeftWall();
 
-        if (rightRay.IsColliding())
+        if (rightRay != null && rightRay.IsColliding())
         {
+            GD.Print("[Dive] Grab right wall");
             Player.WallNormal = rightRay.GetCollisionNormal();
             Player.ChangeMoveState(Player.StateWallRun);
             return true;
         }
 
-        if (leftRay.IsColliding())
+        if (leftRay != null && leftRay.IsColliding())
         {
+            GD.Print("[Dive] Grab left wall");
             Player.WallNormal = leftRay.GetCollisionNormal();
             Player.ChangeMoveState(Player.StateWallRun);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Attempts to grab a ledge while diving.</summary>
+    private bool TryGrabLedge()
+    {
+        RayCast3D wallRay = Player.GetLedgeWallRay();
+        RayCast3D topRay = Player.GetLedgeTopRay();
+
+        if (wallRay == null || topRay == null)
+            return false;
+
+        // Ledge grab requires: wall present, no collision above, and falling downward
+        bool canGrabLedge = wallRay.IsColliding() 
+            && !topRay.IsColliding() 
+            && Player.Velocity.Y < 0;  // Falling downward
+
+        if (canGrabLedge)
+        {
+            GD.Print("[Dive] Grab ledge");
+            Player.ChangeMoveState(Player.StateLedgeGrab);
             return true;
         }
 
@@ -118,6 +147,7 @@ public partial class DiveState : BaseState
     {
         if (Player.GetSlideCollisionCount() > 0 && !Player.IsOnFloor())
         {
+            GD.Print("[Dive] Bonk");
             // Hit obstacle - lose most momentum (bonk penalty)
             Player.Velocity = new Vector3(
                 Player.Velocity.X * BonkVelocityMultiplier,
@@ -140,15 +170,22 @@ public partial class DiveState : BaseState
         // Attempt roll if dive was long enough and player is holding dash
         if (_diveElapsedTime >= Player.MinDiveTimeForRoll && Input.IsActionPressed("dash"))
         {
+            GD.Print("[Dive] Roll");
             Player.ChangeMoveState(Player.StateDiveRoll);  // Roll preserves momentum
             return true;
         }
 
         // No roll - transition based on velocity
         if (Player.Velocity.Length() > MinMomentumThreshold)
+        {
+            GD.Print("[Dive] Land -> Walk");
             Player.ChangeMoveState(Player.StateWalk);
+        }
         else
+        {
+            GD.Print("[Dive] Land -> Idle");
             Player.ChangeMoveState(Player.StateIdle);
+        }
 
         return true;
     }
