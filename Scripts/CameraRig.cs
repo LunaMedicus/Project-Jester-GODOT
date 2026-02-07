@@ -31,7 +31,15 @@ public partial class CameraRig : Node3D
     
     /// <summary>Speed of camera tilt interpolation (for wall running).</summary>
     [Export] public float TiltSpeed = 5.0f;
+
+    /// <summary>Minimum vertical camera angle in degrees (-90 degrees).</summary>
+    [Export(PropertyHint.Range, "-90,0,0.1")] public float minVerticalAngle = -90; // -90 degrees 
+    
+    /// <summary>Maximum vertical camera angle in degrees (45 degrees).</summary>
+    [Export(PropertyHint.Range, "0,90,0.1")] public float maxVerticalAngle = 45;  // 45 degrees  
+
     #endregion
+
 
     #region Tilt State
     /// <summary>Current camera Z rotation (interpolates toward TargetTilt).</summary>
@@ -64,7 +72,8 @@ public partial class CameraRig : Node3D
         if (@event is InputEventMouseMotion mouseMotion)
         {
             // Negative values = inverted (natural feel)
-            RotateCamera(-mouseMotion.Relative.X * MouseSensitivity, -mouseMotion.Relative.Y * MouseSensitivity);
+            RotateCamera(-mouseMotion.Relative.X * MouseSensitivity, 
+            -mouseMotion.Relative.Y * MouseSensitivity);
         }
         
         // === Escape Key: Release Mouse ===
@@ -125,16 +134,18 @@ public partial class CameraRig : Node3D
     {
         if (SpringArm == null) return;
 
-        // Apply rotation to SpringArm
-        SpringArm.RotateY(moveX);  // Horizontal look
-        SpringArm.RotateX(moveY);  // Vertical look
-
+        // Get current rotation
         Vector3 rot = SpringArm.Rotation;
         
         // === Clamp Vertical Look ===
-        // Prevent looking too far up or down (±75 degrees)
-        rot.X = Mathf.Clamp(rot.X, Mathf.DegToRad(-75), Mathf.DegToRad(75));
-        
+        // Prevent looking too far up or down using configured angles
+        rot.X = Mathf.Clamp(rot.X, Mathf.DegToRad(minVerticalAngle), Mathf.DegToRad(maxVerticalAngle));
+        rot.Y = Mathf.Wrap(rot.Y, -Mathf.Pi, Mathf.Pi); // Wrap horizontal rotation for consistency
+
+         // Apply rotation to SpringArm
+        rot.X += moveY; // Vertical rotation (pitch)
+        rot.Y += moveX; // Horizontal rotation (yaw)
+
         // === Reset Z Rotation ===
         // Force SpringArm Z to 0 so it never tilts sideways
         // Only the Camera3D child is allowed to tilt (for wall running effect)
