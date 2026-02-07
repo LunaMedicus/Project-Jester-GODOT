@@ -76,6 +76,14 @@ public partial class CameraRig : Node3D
             -mouseMotion.Relative.Y * MouseSensitivity);
         }
         
+        if (Input.IsActionPressed("WheelUp"))
+        {
+            SpringArm.SpringLength -= 0.5f; // zoom in
+        }
+        if (Input.IsActionPressed("WheelDown"))
+        {
+            SpringArm.SpringLength += 0.5f; // zoom out
+        }   
         // === Escape Key: Release Mouse ===
         if (Input.IsActionJustPressed("ui_cancel"))
         {
