@@ -69,7 +69,7 @@ public partial class CameraRig : Node3D
     public override void _UnhandledInput(InputEvent @event)
     {
         // === Mouse Look ===
-        if (@event is InputEventMouseMotion mouseMotion)
+        if (@event is InputEventMouseMotion mouseMotion && Input.MouseMode == Input.MouseModeEnum.Captured)
         {
             // Negative values = inverted (natural feel)
             RotateCamera(-mouseMotion.Relative.X * MouseSensitivity, 
